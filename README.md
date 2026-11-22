@@ -1,8 +1,12 @@
 # Card Balance Game
 
-A small turn-based card duel, written from scratch, with hand-coded bots, a tournament runner, and a reinforcement-learning agent (PPO) trained to play it. The long-term goal is an automated **balance-testing tool**: play thousands of games and find which cards are too strong or too weak.
+A turn-based card duel, built from scratch, together with the tools to study it: hand-coded bots, reinforcement-learning agents (PPO), and a statistical **balance-testing tool** that estimates which cards are too strong or too weak, and checks its own accuracy by planting known changes.
 
-**Status:** engine, bots, tournaments, replays, and a trained PPO agent are done. The balance-analysis tool and a graphical replay viewer are not built yet (see [Roadmap](#roadmap)).
+![Two bots playing a saved replay](docs/demo.gif)
+
+*A saved game replayed in the built-in viewer: a trained PPO agent (left) beats the greedy bot on turn 21.*
+
+**Status: v0.1, complete.** Engine, bots, tournaments, PPO training (5 seeds), card-power estimator, parameter sweeps, planted-change validation, a first automatic-balancing search, and a graphical replay viewer. Results and their limits are below; some of them are negative.
 
 ## The game
 
@@ -22,30 +26,90 @@ Two players start at 20 HP and alternate turns.
 | Shield | 1 | Gain 3 shield |
 | Drain | 3 | Deal 3 damage and restore 3 HP |
 
-All card stats and rules live in [`configs/cards.yaml`](configs/cards.yaml), not in code, so a balance change is a one-line edit.
+All card stats and rules live in [`configs/cards.yaml`](configs/cards.yaml), so a balance change is a one-line edit. [`configs/cards_balanced.yaml`](configs/cards_balanced.yaml) is the output of the automatic balancing search (see result 4).
 
 ## Results
 
-All numbers below come from the code in this repo. They are from a **single training run (seed 0)**, so treat them as indicative, not as averages.
+All numbers come from the code in this repo; the raw outputs are in [`docs/results/`](docs/results). Every win rate counts a draw as half a win.
 
-### PPO against the hand-written bots
+### 1. PPO agents beat all four hand-written bots, consistently across seeds
 
-Trained for 600,000 steps (about 7 minutes on a laptop CPU) against a random mix of the four bots, playing both seats. Then evaluated on fresh games, 500 per pairing (seed 777):
+Five PPO models (seeds 0-4, 600,000 training steps each) were trained against a random mix of the four bots, playing both seats, then all evaluated on the **same fresh games** (500 per bot).
 
-| PPO win rate vs | random | aggressive | defensive | greedy |
-|---|---|---|---|---|
-| | 93.0% | 92.2% | 69.8% | 73.2% |
+| PPO win rate vs | mean of 5 models | std across models | worst - best |
+|---|---|---|---|
+| random | 94.4% | 1.0 | 93.0 - 95.5% |
+| aggressive | 92.1% | 0.9 | 90.9 - 93.5% |
+| defensive | 71.4% | 0.8 | 70.5 - 72.4% |
+| greedy | 73.5% | 1.7 | 71.1 - 75.2% |
+| **average of the four** | **82.9%** | **0.9** | 81.4 - 83.6% |
 
-Elo from the same tournament: **ppo 1240**, defensive 1091, greedy 1068, random 828, aggressive 773.
+![Learning curves, 5 runs](docs/learning_curves.png)
 
-During training the average win rate rose from 71.5% (50k steps) to about 80% by 350k steps, then plateaued (79.9% at 600k).
+Learning is fast (about 73% on average after 50,000 steps) and flattens by roughly 350,000 steps. The standard deviation is across the 5 models. With 500 games per cell, the sampling error of any single cell is about 2 points near 93% and about 4 points near 70% (95% interval), so small differences between cells are noise. Training one model alone takes about 7 minutes on a laptop CPU (the five parallel runs took about 32 minutes in total because they shared the CPU). Full table: [`ppo_five_seeds.txt`](docs/results/ppo_five_seeds.txt).
 
-### What the tournaments revealed about the game
+### 2. Which cards are too strong or too weak?
 
-- **Pure aggression is a bad strategy.** The "aggressive" bot only plays damage cards, so Heal and Shield cards pile up unused, the hand fills, and new damage cards get burned. It ends up below random in Elo.
-- **First-mover advantage had to be tuned.** In the first, deterministic version of the game the first player won almost every game. After adding random draws, a sweep of the second-player compensation showed 1 extra card gave the first mover only 32-35% (smart bots), 0 gave 41-43%, and -1 gave 59-60%. The game ships with 0. A small second-player edge (first mover wins about 41-45% against its own copy for the smart bots) remains.
-- **Games can stall.** Across all matchups, 11.7% of games were draws (876 of 7,500). Draws concentrate where both sides heal and shield: defensive vs defensive was 28%. Sustain (Heal, Drain, Shield) is strong relative to damage. This is a natural first target for the balance tool.
-- **Deterministic bots in a deterministic game give fake precision.** 1,000 games between two heuristic bots were really two distinct games repeated. Random card draws fixed this, and games now come in seat-swapped pairs that share one draw seed.
+The estimator uses the random deal as a natural experiment (see [Method](#method)). In 20,000 mirror games of the greedy bot, one extra *starting* copy of each card changes the holder's win probability, relative to the median card, by:
+
+![Card power](docs/card_effects.png)
+
+| Card | Effect (points of win probability) | 95% interval | Verdict |
+|---|---|---|---|
+| Fireball | +9.0 | +8.2 to +9.7 | too strong |
+| Drain | +1.9 | +1.2 to +2.7 | ok |
+| Heal | 0 (reference) | | ok |
+| Strike | -2.2 | -2.9 to -1.4 | too weak |
+| Shield | -5.5 | -6.3 to -4.8 | too weak |
+
+With identical hands the first player wins 46.2% (+/- 0.6), so moving second is slightly favourable. A second bot (defensive) gave the same picture. Because each player draws about one card per turn, a card's power is mostly its per-card effect rather than its mana efficiency, which fits Fireball (7 damage) being strong and the 3-point Strike and Shield being weak; this is an interpretation, not something the tool proves.
+
+### 3. Does the tool actually work? Planted-change validation
+
+The game itself is not balanced, so "does the tool flag the card?" would be muddied. Instead the experiment plants known changes (each card's main stat changed by +1, +2, +4, -1 or -2, two independent repeats each) and asks whether the tool sees the card's power change, and attributes it to the right card.
+
+![Detection of planted changes](docs/detection.png)
+
+| | Result |
+|---|---|
+| Planted change detected (correct direction, Bonferroni-corrected) | **44 / 50 (88%, 95% interval 76 - 94%)** |
+| ...attributed to the right card (largest change) | 37 / 50 |
+| Excluding Shield | detected 39 / 40, attributed 35 / 40 |
+| False alarms with nothing planted | 0 / 20 comparisons |
+
+- It sees changes as small as **+14%** (Fireball damage 7 to 8) in both repeats.
+- **Shield is where it fails** (detected 5 / 10, attributed 2 / 10): making Shield stronger from 3 to 4, 5 or 7 barely changes win probability (+0.4 to +1.2 points), because shield is capped at 6 and expires each turn. So these misses probably reflect a real lack of effect, not only a blind spot of the tool, but this experiment cannot tell the two apart.
+- 0 false alarms in 20 repeats is consistent with a correct 5% error rate (the chance of seeing 0 of 20 at 5% is about 36%), but 20 repeats are too few to show the test is well calibrated.
+- Limits: one bot (greedy), two repeats per change, whole-number stat steps, and the smallest change tested was 14%, so the detection floor for subtler changes is unknown.
+
+Raw trials: [`validation_greedy.csv`](docs/results/validation_greedy.csv).
+
+### 4. Can it fix the balance automatically? Only partly
+
+`autobalance` tries single and paired changes to flagged cards, rejects changes that make draws more common, and re-checks the winner on new games with a different bot. On the current game:
+
+- It accepted one change: **Fireball damage 7 to 6 and Strike damage 3 to 4**. Fireball's edge fell from +8.7 to +4.4 points, and on new games with the defensive bot it measured +3.8, so the improvement holds up.
+- It **did not balance the game**: 3 cards were still flagged afterwards, Shield was now about -9 points, and draws rose slightly (22.4% to 24.4%).
+- The search stopped because every change that strengthens Shield makes games stall into draws, which it forbids. That is a real trade-off in this ruleset, and it matches result 3 (Shield changes barely help).
+
+Details: [`autobalance_greedy.txt`](docs/results/autobalance_greedy.txt).
+
+### 5. Tuning a rule with `sweep`: compensating the second player
+
+Giving the second player extra starting cards, 2,000 mirror games per setting:
+
+| Second player's extra cards | Greedy: first mover wins | Defensive: first mover wins |
+|---|---|---|
+| +1 | 34.5% | 32.2% |
+| 0 (shipped) | 41.4% | 42.8% |
+| -1 | 59.0% | 60.4% |
+
+No whole-card setting reaches 50%; the shipped value of 0 is the closest. Games between smart bots are also often stalled: 11.7% of all games in an earlier 7,500-game tournament were draws, concentrated where both sides heal and shield.
+
+### 6. Other findings about the bots
+
+- **Pure aggression is a bad strategy.** The aggressive bot plays only damage cards, so Heal and Shield cards pile up in its hand until the hand limit burns new damage cards. Its Elo is below random.
+- **Deterministic bots give fake precision.** In the first, deterministic version of the game, 1,000 games between two heuristic bots were really two distinct games repeated. Random draws, seat-swapped game pairs and shared deal seeds fixed this.
 
 ## Run it
 
@@ -56,72 +120,83 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m pip install -e .
-```
-
-Run the tests (59, including one that trains a tiny PPO model):
-
-```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-Watch one game, optionally saving a JSON replay to `replays/`:
+(`torch` is only needed for training and the PPO tests, which skip without it.)
 
 ```powershell
-.\.venv\Scripts\python.exe -m manaduel.cli watch --a greedy --b defensive --seed 8 --save
+# play and watch games
+python -m manaduel.cli watch --a greedy --b defensive --seed 8 --save
+python -m manaduel.cli view replays/greedy_vs_defensive_seed8.json          # window
+python -m manaduel.cli view replays/greedy_vs_defensive_seed8.json --gif demo.gif
+
+# bots and tournaments (win-rate matrix, intervals, Elo, first-player advantage)
+python -m manaduel.cli tournament --n 1000
+
+# train PPO and test it
+python -m manaduel.rl.train --steps 600000 --eval-every 50000 --eval-games 200 --seed 0 --out checkpoints/ppo_seed0 --log runs/progress_seed0.csv
+python -m manaduel.cli multiseed "checkpoints/ppo_seed*.zip" --n 500 --seed 777
+python -m manaduel.cli tournament --n 500 --ppo checkpoints/ppo_seed0.zip
+
+# balance tools
+python -m manaduel.cli effects --bot greedy --n 20000
+python -m manaduel.cli sweep --set rules.max_shield=3,4,5,6 --bots greedy defensive --n 2000
+python -m manaduel.cli validate --bot greedy --reps 2 --null-reps 20
+python -m manaduel.cli autobalance --bot greedy --n 10000 --out configs/cards_balanced.yaml
+python -m manaduel.cli --config configs/cards_balanced.yaml effects --bot greedy
+
+# figures from saved data
+python -m manaduel.cli figures --curves "runs/progress_seed*.csv" --validation docs/results/validation_greedy.csv --effects-bot greedy
 ```
 
-Round-robin tournament with win-rate matrix, confidence intervals, Elo, and first-player advantage:
+Use `.\.venv\Scripts\python.exe` in place of `python` if the environment is not activated. The viewer keys are Space (pause), Left/Right (step), Up/Down (speed), R (restart), Q (quit). Trained models and replays are not committed; train your own with the commands above.
 
-```powershell
-.\.venv\Scripts\python.exe -m manaduel.cli tournament --n 1000
-```
+## Method
 
-Train the PPO agent (prints win rates against each bot every 50,000 steps, writes `runs/progress.csv`, saves `checkpoints/ppo_v1.zip`):
+**Card power without bias.** "Win rate when a card is played" is biased: strong players play strong cards when already winning. Starting hands, however, are random and independent of play. For every game, `card_effects.py` regresses the outcome of seat 0 (win = 1, draw = 0.5, loss = 0) on the difference in starting copies of each card between the two seats, plus a seat intercept, in mirror matches (the same bot in both seats). The coefficient of a card is the change in win probability from one extra starting copy. Standard errors are heteroskedasticity-robust (HC1), and a card is flagged only if it is significant after a Bonferroni correction over all cards **and** at least 2 points in size. Effects are only identified relative to each other, so they are reported against the median card (a single outlier does not drag the reference, which the mean would).
 
-```powershell
-.\.venv\Scripts\python.exe -m manaduel.rl.train --steps 600000 --eval-every 50000 --eval-games 200
-```
-
-Include the trained agent in a tournament:
-
-```powershell
-.\.venv\Scripts\python.exe -m manaduel.cli tournament --n 500 --ppo checkpoints/ppo_v1.zip
-```
-
-The trained model is not committed; train your own with the command above.
+**Validation** compares each card's measured power in a changed game against the baseline game on independent deals, using the mean card as the reference (that reference moves linearly, which keeps attribution clean).
 
 ## How it is built
 
 ```
-configs/cards.yaml     card stats and rules
+configs/cards.yaml        card stats and rules (cards_balanced.yaml = autobalance output)
 src/manaduel/
-  engine/              state, rules (legal actions, step), game loop
-  agents/              Agent interface, random + heuristic bots, PPO wrapper
-  sim/                 tournaments, Wilson intervals, Elo, JSON replays
-  rl/                  observation encoding, Gymnasium env, PPO training
-  viewer/              text viewer for finished games
-tests/                 59 tests
+  engine/                 state, rules (legal actions, step), game loop
+  agents/                 Agent interface, random + heuristic bots, PPO wrapper
+  sim/                    tournaments, Wilson intervals, Elo, JSON replays
+  rl/                     observation encoding, Gymnasium env, PPO training
+  analysis/               card effects, sweep, validate, autobalance, multi-seed, plots
+  viewer/                 text viewer and pygame replay viewer (PNG / GIF export)
+tests/                    109 tests
+docs/                     figures, demo GIF, raw results
 ```
 
-Design choices worth knowing:
-
-- **The game is a pure function.** `step(state, action)` returns a new state and never modifies the old one. The random-number-generator state lives inside the game state, so any game replays exactly from its seed.
-- **One `Agent` interface** (`act(state, legal_actions, config)`) means random, heuristic, and learned bots are interchangeable in tournaments.
-- **Action masking.** The RL environment exposes which actions are legal, and `MaskablePPO` assigns illegal moves zero probability. The environment raises an error on an illegal action, so a masking bug cannot hide.
-- **Sparse reward.** +1 for a win, -1 for a loss, 0 for a draw, nothing otherwise.
-- **Statistics.** Win rates carry 95% Wilson intervals, and draws count as half a win.
+- **The game is a pure function.** `step(state, action)` returns a new state and never modifies the old one. The random-number state lives inside the game state, so any game replays exactly from its seed.
+- **One `Agent` interface** (`act(state, legal_actions, config)`) makes random, heuristic and learned bots interchangeable.
+- **Action masking.** `MaskablePPO` gives illegal moves zero probability; the environment raises an error on an illegal action, so a masking bug cannot hide.
+- **Sparse reward:** +1 win, -1 loss, 0 draw, nothing otherwise.
+- **PPO is index-based**, so a trained model goes stale when card stats change. The balance tools therefore screen with the heuristic bots, which read card stats from the config.
 
 ## Limitations
 
-- One training run and one seed. The PPO numbers have not been averaged over several runs.
-- PPO was trained and tested against four simple, fixed bots. Beating them does not mean it plays near-optimally, and it was not tested against strong human play or a copy of itself.
-- The Wilson intervals assume independent games. Paired seeds make them slightly optimistic.
-- Everything is simulation. Bot balance is not the same as human balance.
-- The model sees only the opponent's hand *size*, not their cards.
+- Everything is simulated, and balance for bots is not balance for humans.
+- The estimator measures the value of holding a card at the **start** of the game (together with how the tested bot uses it), not every effect over a whole game.
+- Validation used one bot, two repeats per change and changes of at least 14%; the detection floor for smaller changes is unknown, and Shield changes could not be detected at all.
+- PPO was trained and tested against four simple, fixed bots. It was not tested against strong human play or against itself (no self-play), so beating these bots does not mean near-optimal play.
+- Wilson intervals assume independent games; paired deal seeds make them slightly optimistic.
+- `autobalance` is a greedy search over whole-number steps tuned with the greedy bot and verified with only one other bot. It reduced the largest imbalance but did not produce a balanced game.
+- The model sees only the size of the opponent's hand, not its cards.
+- No license has been granted yet; all rights are reserved by default.
 
 ## Roadmap
 
-- [ ] Balance-analysis tool: per-card statistics, planted-exploit detection, and a parameter sweep command
-- [ ] Graphical replay viewer (pygame)
-- [ ] Self-play training and multiple training seeds
-- [ ] MCTS baseline agent
+- [x] Game engine, bots, tournaments, replays
+- [x] PPO agents, five seeds
+- [x] Card-power estimator, sweep, planted-change validation, autobalance search
+- [x] Graphical replay viewer
+- [ ] Self-play training
+- [ ] Finer card changes (non-integer stats, per-seat modifications) so balancing is not limited to whole-number steps
+- [ ] Validation with more bots, more repeats and smaller planted changes
+- [ ] MCTS baseline (non-trivial because of hidden hands)
