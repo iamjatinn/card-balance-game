@@ -18,8 +18,10 @@ starting copy of card c.
 
 Because both hands have equal size, the differences sum to a constant, so only
 differences BETWEEN cards are identified. Effects are therefore reported
-relative to the average card (they average to zero). `seat0_baseline` is the
-first player's win probability when both players are dealt the same cards
+relative to a reference: by default the MEDIAN card. (Relative to the mean, one
+badly overpowered card would drag the average up and make every normal card
+look weak; the median is not moved by a single outlier.) `seat0_baseline` is
+the first player's win probability when both players are dealt the same cards
 (valid when both hands are the same size, as in the default config).
 
 Limits: the estimate measures the value of holding a card at the start of the
@@ -65,7 +67,7 @@ def collect(config, factory, n_games: int, seed: int = 0) -> Games:
 @dataclass(frozen=True)
 class CardEffect:
     name: str
-    effect: float    # win-probability change per extra starting copy, vs the average card
+    effect: float    # win-probability change per extra starting copy, vs the reference card
     se: float
     ci_low: float    # 95% confidence interval (not adjusted for testing several cards)
     ci_high: float
@@ -79,12 +81,30 @@ class EffectReport:
     seat0_baseline: float      # first player's win probability with identical hands
     seat0_baseline_se: float
     n_games: int
+    reference: str = "median"   # what the effects are measured against
 
     def flagged(self) -> list[CardEffect]:
         return [e for e in self.effects if e.flagged]
 
 
-def estimate_effects(games: Games, alpha: float = 0.05, min_effect: float = 0.02) -> EffectReport:
+def _reference_weights(b: np.ndarray, reference: str) -> np.ndarray:
+    """Weights w such that the reference level is w @ b (the mean or median card)."""
+    k = len(b)
+    if reference == "mean":
+        return np.full(k, 1.0 / k)
+    if reference == "median":
+        order = np.argsort(b)
+        w = np.zeros(k)
+        if k % 2:
+            w[order[k // 2]] = 1.0
+        else:
+            w[order[k // 2 - 1]] = w[order[k // 2]] = 0.5
+        return w
+    raise ValueError("reference must be 'median' or 'mean'")
+
+
+def estimate_effects(games: Games, alpha: float = 0.05, min_effect: float = 0.02,
+                     reference: str = "median") -> EffectReport:
     """Fit the regression and flag outlier cards.
 
     A card is flagged when BOTH hold:
@@ -108,9 +128,11 @@ def estimate_effects(games: Games, alpha: float = 0.05, min_effect: float = 0.02
     meat = (X * resid[:, None] ** 2).T @ X
     cov = xtx_inv @ meat @ xtx_inv * n / (n - X.shape[1])
 
-    # beta[1:] are effects relative to the last card. Re-express each card
-    # relative to the average card: e_c = b_c - mean(b), where b_last = 0.
-    center = np.eye(k)[:, : k - 1] - 1.0 / k
+    # beta[1:] are effects relative to the last card (whose own value is 0).
+    # Re-express every card relative to the reference: e_c = b_c - w @ b.
+    spread = np.vstack([np.eye(k - 1), np.zeros((1, k - 1))])   # b = spread @ beta[1:]
+    w = _reference_weights(spread @ beta[1:], reference)
+    center = (np.eye(k) - np.outer(np.ones(k), w)) @ spread
     effect = center @ beta[1:]
     cov_effect = center @ cov[1:, 1:] @ center.T
     se = np.sqrt(np.clip(np.diag(cov_effect), 0.0, None))
@@ -137,16 +159,20 @@ def estimate_effects(games: Games, alpha: float = 0.05, min_effect: float = 0.02
         seat0_baseline=float(beta[0]),
         seat0_baseline_se=float(np.sqrt(max(cov[0, 0], 0.0))),
         n_games=n,
+        reference=reference,
     )
 
 
 def format_report(report: EffectReport) -> str:
     lines = [
         f"Card power from {report.n_games} mirror games "
-        "(win-probability change per extra starting copy, vs the average card)",
+        f"(win-probability change per extra starting copy, vs the {report.reference} card)",
         f"{'card':>10} {'effect':>8} {'95% interval':>18} {'z':>7}  verdict",
     ]
     for e in sorted(report.effects, key=lambda e: -e.effect):
+        if e.se == 0:  # the card that defines zero has no uncertainty of its own
+            lines.append(f"{e.name:>10} {0.0:>+8.1%} {'(the reference card)':>18}")
+            continue
         verdict = ("TOO STRONG" if e.effect > 0 else "TOO WEAK") if e.flagged else "ok"
         lines.append(
             f"{e.name:>10} {e.effect:>+8.1%} [{e.ci_low:>+7.1%}, {e.ci_high:>+7.1%}] {e.z:>7.1f}  {verdict}"

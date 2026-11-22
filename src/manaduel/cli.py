@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from manaduel.agents.registry import BOT_FACTORIES
+from manaduel.analysis.autobalance import autobalance, config_to_yaml, format_trajectory
 from manaduel.analysis.card_effects import collect, estimate_effects
 from manaduel.analysis.card_effects import format_report as format_effects
 from manaduel.analysis.sweep import format_table, parse_set, run_sweep, write_csv
@@ -62,6 +63,25 @@ def _effects(args, config, factories) -> None:
     print(format_effects(estimate_effects(games)))
 
 
+def _autobalance(args, config, factories) -> None:
+    factory = _pick(factories, args.bot)
+    print(f"Autobalance with '{args.bot}': {args.n} games per measurement, "
+          f"up to {args.max_steps} steps, seed {args.seed}\n", flush=True)
+    result = autobalance(config, factory, args.n, args.seed, args.max_steps,
+                         log=lambda text: print(text, flush=True))
+    print("\n" + format_trajectory(result))
+    print("\nFinal card power on the tuning games:")
+    print(format_effects(result.steps[-1].report))
+    if args.verify_bot:
+        verify = _pick(factories, args.verify_bot)
+        print(f"\nCheck on NEW games with a different bot ('{args.verify_bot}', seed {args.verify_seed}):")
+        games = collect(result.config, verify, args.n, args.verify_seed)
+        print(format_effects(estimate_effects(games)))
+    if args.out:
+        config_to_yaml(result.config, args.out)
+        print(f"\nSaved the balanced config to {args.out}")
+
+
 def _sweep(args, config, factories) -> None:
     try:
         grid = dict(parse_set(spec) for spec in args.set)
@@ -81,6 +101,8 @@ def _sweep(args, config, factories) -> None:
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog="manaduel")
+    parser.add_argument("--config", help="card/rule file to use instead of configs/cards.yaml "
+                                         "(goes before the command)")
     sub = parser.add_subparsers(dest="command", required=True)
 
     watch = sub.add_parser("watch", help="play one game and print it")
@@ -110,11 +132,21 @@ def main(argv=None) -> None:
     sw.add_argument("--seed", type=int, default=0)
     sw.add_argument("--csv", help="also write the results to this CSV file")
 
+    ab = sub.add_parser("autobalance", help="suggest card changes that remove over/underpowered cards")
+    ab.add_argument("--bot", default="greedy", help="bot used for tuning")
+    ab.add_argument("--n", type=int, default=10000, help="games per measurement")
+    ab.add_argument("--seed", type=int, default=0)
+    ab.add_argument("--max-steps", type=int, default=15)
+    ab.add_argument("--verify-bot", default="defensive", help="different bot for the final check")
+    ab.add_argument("--verify-seed", type=int, default=99991, help="new seed for the final check")
+    ab.add_argument("--out", help="write the balanced config to this YAML file")
+
     args = parser.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
-    config = load_game_config()
+    config = load_game_config(Path(args.config)) if args.config else load_game_config()
     factories = _factories(getattr(args, "ppo", None))
-    handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects, "sweep": _sweep}
+    handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
+                "sweep": _sweep, "autobalance": _autobalance}
     handlers[args.command](args, config, factories)
 
 

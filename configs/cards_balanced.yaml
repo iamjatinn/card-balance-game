@@ -1,0 +1,26 @@
+rules:
+  max_hp: 20
+  max_mana: 5
+  max_turns: 40
+  max_shield: 6
+  start_hand: 3
+  max_hand: 6
+  draw_per_turn: 1
+  second_player_extra_cards: 0
+cards:
+  strike:
+    cost: 1
+    damage: 4
+  fireball:
+    cost: 3
+    damage: 6
+  heal:
+    cost: 2
+    heal: 4
+  shield:
+    cost: 1
+    shield: 3
+  drain:
+    cost: 3
+    damage: 3
+    heal: 3
