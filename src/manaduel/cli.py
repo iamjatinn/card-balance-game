@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 
 from manaduel.agents.registry import BOT_FACTORIES
+from manaduel.analysis.card_effects import collect, estimate_effects
+from manaduel.analysis.card_effects import format_report as format_effects
 from manaduel.engine.game import play_game
 from manaduel.engine.rules import load_game_config
 from manaduel.sim.replay import save_replay
@@ -52,6 +54,13 @@ def _tournament(args, config, factories) -> None:
     print(format_report(results, names))
 
 
+def _effects(args, config, factories) -> None:
+    factory = _pick(factories, args.bot)
+    print(f"Mirror matches of '{args.bot}': {args.n} games, seed {args.seed}\n")
+    games = collect(config, factory, args.n, args.seed)
+    print(format_effects(estimate_effects(games)))
+
+
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog="manaduel")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -69,11 +78,18 @@ def main(argv=None) -> None:
     tour.add_argument("--agents", nargs="+", help="which bots to include (default: all)")
     tour.add_argument("--ppo", help="path to a trained model; adds a 'ppo' bot")
 
+    eff = sub.add_parser("effects", help="estimate how strong each card is (mirror matches)")
+    eff.add_argument("--bot", default="greedy", help="bot that plays both seats")
+    eff.add_argument("--n", type=int, default=20000, help="number of games")
+    eff.add_argument("--seed", type=int, default=0)
+    eff.add_argument("--ppo", help="path to a trained model; makes 'ppo' available")
+
     args = parser.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
     config = load_game_config()
     factories = _factories(args.ppo)
-    {"watch": _watch, "tournament": _tournament}[args.command](args, config, factories)
+    handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects}
+    handlers[args.command](args, config, factories)
 
 
 if __name__ == "__main__":
