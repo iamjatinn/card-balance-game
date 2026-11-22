@@ -65,6 +65,43 @@ def _effects(args, config, factories) -> None:
     print(format_effects(estimate_effects(games)))
 
 
+def _multiseed(args, config, factories) -> None:
+    import glob
+
+    paths = sorted(glob.glob(args.checkpoints))
+    if not paths:
+        raise SystemExit(f"no models match {args.checkpoints!r}")
+    from manaduel.analysis.multiseed import final_eval, format_final, write_final_csv
+
+    print(f"Evaluating {len(paths)} models, {args.n} games per bot, seed {args.seed}\n", flush=True)
+    scores = final_eval(paths, args.n, args.seed, args.workers)
+    bots = list(BOT_FACTORIES)
+    print(format_final(paths, bots, scores, args.n))
+    if args.csv:
+        write_final_csv(paths, bots, scores, args.csv)
+        print(f"\nSaved {args.csv}")
+
+
+def _figures(args, config, factories) -> None:
+    from manaduel.analysis import plots
+    from manaduel.analysis.multiseed import aggregate, load_curves
+
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    made = []
+    if args.curves:
+        plots.plot_learning_curves(aggregate(load_curves(args.curves)), out / "learning_curves.png")
+        made.append("learning_curves.png")
+    if args.validation:
+        plots.plot_detection(plots.load_validation_csv(args.validation), out / "detection.png")
+        made.append("detection.png")
+    if args.effects_bot:
+        games = collect(config, _pick(factories, args.effects_bot), args.effects_n, 0)
+        plots.plot_card_effects(estimate_effects(games), out / "card_effects.png")
+        made.append("card_effects.png")
+    print("Wrote " + ", ".join(str(out / m) for m in made) if made else "Nothing to draw: give --curves, --validation or --effects-bot")
+
+
 def _view(args, config, factories) -> None:
     # Imported here so the rest of the project works without pygame installed.
     from manaduel.viewer import pygame_viewer
@@ -183,6 +220,20 @@ def main(argv=None) -> None:
     va.add_argument("--workers", type=int, default=None, help="parallel processes (default: most cores)")
     va.add_argument("--csv", help="also write the trials to this CSV file")
 
+    ms = sub.add_parser("multiseed", help="evaluate several trained models on the same fresh games")
+    ms.add_argument("checkpoints", help='glob such as "checkpoints/ppo_seed*.zip"')
+    ms.add_argument("--n", type=int, default=500, help="games per bot per model")
+    ms.add_argument("--seed", type=int, default=777)
+    ms.add_argument("--workers", type=int, default=None)
+    ms.add_argument("--csv", help="also write the table to this CSV file")
+
+    fg = sub.add_parser("figures", help="draw README figures from saved data")
+    fg.add_argument("--out", default="docs", help="folder for the PNG files")
+    fg.add_argument("--curves", help='learning-curve CSVs, e.g. "runs/progress_seed*.csv"')
+    fg.add_argument("--validation", help="validation CSV from the validate command")
+    fg.add_argument("--effects-bot", help="measure card power with this bot and plot it")
+    fg.add_argument("--effects-n", type=int, default=20000)
+
     vw = sub.add_parser("view", help="watch a saved replay in a window (needs pygame)")
     vw.add_argument("replay", help="a replay JSON from: watch --save")
     vw.add_argument("--speed", type=float, default=1.0)
@@ -196,7 +247,8 @@ def main(argv=None) -> None:
     config = load_game_config(Path(args.config)) if args.config else load_game_config()
     factories = _factories(getattr(args, "ppo", None))
     handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
-                "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view}
+                "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view,
+                "multiseed": _multiseed, "figures": _figures}
     handlers[args.command](args, config, factories)
 
 

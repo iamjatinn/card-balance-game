@@ -1,0 +1,15 @@
+﻿Evaluating 5 models, 500 games per bot, seed 777
+
+Final evaluation of 5 trained model(s): 500 games per bot, same fresh games for every model
+model                       random  aggressive   defensive      greedy      mean
+ppo_seed0.zip                94.7%       92.0%       72.4%       75.2%     83.6%
+ppo_seed1.zip                93.9%       92.1%       72.1%       73.1%     82.8%
+ppo_seed2.zip                95.5%       92.2%       71.2%       73.1%     83.0%
+ppo_seed3.zip                93.0%       90.9%       70.5%       71.1%     81.4%
+ppo_seed4.zip                95.0%       93.5%       70.7%       75.2%     83.6%
+mean                         94.4%       92.1%       71.4%       73.5%     82.9%
+std across models             1.0%        0.9%        0.8%        1.7%      0.9%
+worst model                  93.0%       90.9%       70.5%       71.1%     81.4%
+best model                   95.5%       93.5%       72.4%       75.2%     83.6%
+
+Saved docs/results/ppo_five_seeds.csv
