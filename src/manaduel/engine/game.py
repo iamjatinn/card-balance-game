@@ -1,6 +1,6 @@
 """The game loop: let two agents play one full game and record a replay."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from manaduel.engine.rules import GameConfig, legal_actions, new_game, step
 from manaduel.engine.state import GameState, is_terminal, winner
@@ -11,6 +11,10 @@ class GameResult:
     winner: int | None   # 0, 1, or None for a draw
     turns: int           # turn number the game ended on
     events: list[dict]   # one JSON-friendly record per action: the replay
+    # The cards each player was dealt before the game began (copies of each card
+    # type). The deal is random and independent of how anyone plays, which is
+    # what lets the balance tool measure card power without bias.
+    start_hands: list[list[int]] = field(default_factory=list)
 
 
 def _event(before: GameState, action: int, after: GameState, config: GameConfig) -> dict:
@@ -29,6 +33,7 @@ def play_game(config: GameConfig, agents, seed: int = 0, state: GameState | None
     """agents is a pair (agent for player 0, agent for player 1).
     `seed` decides the card draws. `state` lets a test start from a chosen position."""
     state = new_game(config, seed) if state is None else state
+    start_hands = [list(p.hand) for p in state.players]
     events: list[dict] = []
     max_turns = config.rules.max_turns
 
@@ -47,4 +52,5 @@ def play_game(config: GameConfig, agents, seed: int = 0, state: GameState | None
         winner=winner(state, max_turns),
         turns=min(state.turn, max_turns),
         events=events,
+        start_hands=start_hands,
     )

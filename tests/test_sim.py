@@ -60,3 +60,11 @@ def test_replay_round_trip(tmp_path):
     assert data["events"] == result.events
     assert data["agents"] == ["A", "B"]
     assert len(data["cards"]) == 5
+    assert data["start_hands"] == result.start_hands
+    assert [sum(h) for h in data["start_hands"]] == [3, 3]
+
+
+def test_match_tracks_average_game_length():
+    r = play_match(CFG, "greedy", GreedyAgent, "rand", RandomAgent, 40, seed=2)
+    assert r.turns_total > 0
+    assert 1 <= r.avg_turns <= CFG.rules.max_turns

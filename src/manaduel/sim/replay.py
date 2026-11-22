@@ -19,6 +19,7 @@ def save_replay(path, result, config, names, seed=None) -> Path:
         "turns": result.turns,
         "rules": asdict(config.rules),
         "cards": [asdict(card) for card in config.cards],
+        "start_hands": result.start_hands,
         "events": result.events,
     }
     path.write_text(json.dumps(data, indent=2), encoding="utf-8")

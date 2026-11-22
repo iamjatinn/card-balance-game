@@ -15,10 +15,15 @@ class MatchResult:
     wins_b: int
     draws: int
     first_player_wins: int  # games won by whoever moved first (either bot)
+    turns_total: int = 0    # sum of game lengths, for the average
 
     @property
     def games(self) -> int:
         return self.wins_a + self.wins_b + self.draws
+
+    @property
+    def avg_turns(self) -> float:
+        return self.turns_total / self.games
 
     @property
     def points_a(self) -> float:
@@ -39,7 +44,7 @@ def play_match(config, name_a, factory_a, name_b, factory_b, n_games, seed=0) ->
     factory_x(seed) must build a fresh bot. Fresh bots per game mean the games
     are independent and each one is reproducible from its seed.
     """
-    wins_a = wins_b = draws = first_wins = 0
+    wins_a = wins_b = draws = first_wins = turns_total = 0
     for g in range(n_games):
         a_moves_first = g % 2 == 0
         bot_a = factory_a(seed + 2 * g)
@@ -49,6 +54,7 @@ def play_match(config, name_a, factory_a, name_b, factory_b, n_games, seed=0) ->
         # which cancels some of the luck of the draw between the two bots.
         game_seed = seed + 1_000_003 * (g // 2 + 1)
         result = play_game(config, agents, seed=game_seed)
+        turns_total += result.turns
 
         if result.winner is None:
             draws += 1
@@ -60,7 +66,7 @@ def play_match(config, name_a, factory_a, name_b, factory_b, n_games, seed=0) ->
             wins_a += 1
         else:
             wins_b += 1
-    return MatchResult(name_a, name_b, wins_a, wins_b, draws, first_wins)
+    return MatchResult(name_a, name_b, wins_a, wins_b, draws, first_wins, turns_total)
 
 
 def round_robin(config, factories: dict, n_games: int, seed: int = 0) -> list[MatchResult]:

@@ -56,6 +56,16 @@ def test_same_seeds_give_identical_games():
     assert a == b
 
 
+def test_result_records_the_dealt_hands():
+    result = play_game(CFG, (RandomAgent(1), RandomAgent(2)), seed=9)
+    dealt = new_game(CFG, 9)
+    assert result.start_hands == [list(p.hand) for p in dealt.players]
+    assert [sum(h) for h in result.start_hands] == [
+        CFG.rules.start_hand,
+        CFG.rules.start_hand + CFG.rules.second_player_extra_cards,
+    ]
+
+
 def test_different_game_seeds_give_different_games():
     games = [
         play_game(CFG, (RandomAgent(7), RandomAgent(8)), seed=s).events for s in range(5)
