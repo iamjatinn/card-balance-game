@@ -36,15 +36,28 @@ class GameConfig:
         return "end_turn" if action == self.end_turn else self.cards[action].name
 
 
-def load_game_config(path: Path = CONFIG_PATH) -> GameConfig:
-    cards, rules = load_config(path)
-    for card in cards.values():
+def check_config(config: GameConfig) -> None:
+    """Reject settings that would break the game (for example, a free card)."""
+    for card in config.cards:
         # A free card could be played forever and a turn would never end.
         if card.cost < 1:
             raise ValueError(f"card '{card.name}' must cost at least 1 mana")
         if card.weight < 1:
             raise ValueError(f"card '{card.name}' must have weight of at least 1")
-    return GameConfig(cards=tuple(cards.values()), rules=rules)
+    rules = config.rules
+    if rules.start_hand + rules.second_player_extra_cards < 0:
+        raise ValueError("the second player would start with a negative number of cards")
+    if rules.max_hp < 1 or rules.max_mana < 1 or rules.max_hand < 1 or rules.max_turns < 1:
+        raise ValueError("max_hp, max_mana, max_hand and max_turns must all be at least 1")
+    if rules.max_shield < 1:
+        raise ValueError("max_shield must be at least 1")
+
+
+def load_game_config(path: Path = CONFIG_PATH) -> GameConfig:
+    cards, rules = load_config(path)
+    config = GameConfig(cards=tuple(cards.values()), rules=rules)
+    check_config(config)
+    return config
 
 
 # --------------------------------------------------------------------------

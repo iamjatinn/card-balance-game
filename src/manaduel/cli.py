@@ -11,6 +11,7 @@ from pathlib import Path
 from manaduel.agents.registry import BOT_FACTORIES
 from manaduel.analysis.card_effects import collect, estimate_effects
 from manaduel.analysis.card_effects import format_report as format_effects
+from manaduel.analysis.sweep import format_table, parse_set, run_sweep, write_csv
 from manaduel.engine.game import play_game
 from manaduel.engine.rules import load_game_config
 from manaduel.sim.replay import save_replay
@@ -61,6 +62,23 @@ def _effects(args, config, factories) -> None:
     print(format_effects(estimate_effects(games)))
 
 
+def _sweep(args, config, factories) -> None:
+    try:
+        grid = dict(parse_set(spec) for spec in args.set)
+    except ValueError as error:
+        raise SystemExit(str(error))
+    chosen = {n: _pick(factories, n) for n in args.bots}
+    print(f"Sweep: {args.n} mirror games per setting per bot, seed {args.seed}\n")
+    try:
+        rows = run_sweep(config, grid, chosen, args.n, args.seed)
+    except ValueError as error:
+        raise SystemExit(str(error))
+    print(format_table(rows))
+    if args.csv:
+        write_csv(rows, args.csv)
+        print(f"\nSaved {args.csv}")
+
+
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog="manaduel")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -84,11 +102,19 @@ def main(argv=None) -> None:
     eff.add_argument("--seed", type=int, default=0)
     eff.add_argument("--ppo", help="path to a trained model; makes 'ppo' available")
 
+    sw = sub.add_parser("sweep", help="try a setting at several values and measure the effect")
+    sw.add_argument("--set", action="append", required=True, metavar="KEY=V1,V2,...",
+                    help="e.g. rules.max_shield=3,4,5,6 or cards.heal.heal=3,4 (repeat for a grid)")
+    sw.add_argument("--bots", nargs="+", default=["greedy", "defensive"])
+    sw.add_argument("--n", type=int, default=2000, help="mirror games per setting per bot")
+    sw.add_argument("--seed", type=int, default=0)
+    sw.add_argument("--csv", help="also write the results to this CSV file")
+
     args = parser.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
     config = load_game_config()
-    factories = _factories(args.ppo)
-    handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects}
+    factories = _factories(getattr(args, "ppo", None))
+    handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects, "sweep": _sweep}
     handlers[args.command](args, config, factories)
 
 
