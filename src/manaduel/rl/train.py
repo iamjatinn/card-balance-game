@@ -52,6 +52,7 @@ def main() -> None:
     parser.add_argument("--envs", type=int, default=8, help="games played in parallel")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--out", default="checkpoints/ppo_v1")
+    parser.add_argument("--log", default="runs/progress.csv", help="where to write the learning curve CSV")
     args = parser.parse_args()
 
     config = load_game_config()
@@ -72,8 +73,8 @@ def main() -> None:
         verbose=0,
     )
 
-    Path("runs").mkdir(exist_ok=True)
-    log_path = Path("runs") / "progress.csv"
+    log_path = Path(args.log)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     names = list(BOT_FACTORIES)
     with open(log_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)

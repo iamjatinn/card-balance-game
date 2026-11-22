@@ -2,6 +2,8 @@ pyyaml
 pytest
 numpy
 gymnasium
+pygame
+pillow
 # Training libraries. Install torch (CPU build) first, then these:
 #   pip install torch --index-url https://download.pytorch.org/whl/cpu
 stable-baselines3

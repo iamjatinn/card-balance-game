@@ -65,6 +65,22 @@ def _effects(args, config, factories) -> None:
     print(format_effects(estimate_effects(games)))
 
 
+def _view(args, config, factories) -> None:
+    # Imported here so the rest of the project works without pygame installed.
+    from manaduel.viewer import pygame_viewer
+
+    if not Path(args.replay).exists():
+        raise SystemExit(f"no such replay file: {args.replay}  (create one with: watch --save)")
+    if args.png:
+        pygame_viewer.save_png(args.png, args.replay, args.beat, args.progress)
+        print(f"Saved {args.png}")
+    elif args.gif:
+        frames = pygame_viewer.save_gif(args.gif, args.replay, speed=args.speed)
+        print(f"Saved {args.gif} ({frames} frames)")
+    else:
+        pygame_viewer.run_window(args.replay, args.speed)
+
+
 def _validate(args, config, factories) -> None:
     factory = _pick(factories, args.bot)
     print(f"Validation with '{args.bot}': deltas {args.deltas}, {args.n} games per measurement, "
@@ -167,12 +183,20 @@ def main(argv=None) -> None:
     va.add_argument("--workers", type=int, default=None, help="parallel processes (default: most cores)")
     va.add_argument("--csv", help="also write the trials to this CSV file")
 
+    vw = sub.add_parser("view", help="watch a saved replay in a window (needs pygame)")
+    vw.add_argument("replay", help="a replay JSON from: watch --save")
+    vw.add_argument("--speed", type=float, default=1.0)
+    vw.add_argument("--png", help="instead of a window, save one frame to this PNG")
+    vw.add_argument("--beat", type=int, help="which card play to render with --png (default: middle)")
+    vw.add_argument("--progress", type=float, default=0.85, help="how far into the beat, 0 to 1 (with --png)")
+    vw.add_argument("--gif", help="instead of a window, export the whole game as an animated GIF")
+
     args = parser.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
     config = load_game_config(Path(args.config)) if args.config else load_game_config()
     factories = _factories(getattr(args, "ppo", None))
     handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
-                "sweep": _sweep, "autobalance": _autobalance, "validate": _validate}
+                "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view}
     handlers[args.command](args, config, factories)
 
 
