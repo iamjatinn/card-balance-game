@@ -1,0 +1,31 @@
+# Card stats and game rules live here, not in code.
+# Balance patches later = edits to this file.
+
+rules:
+  max_hp: 20
+  max_mana: 5
+  max_turns: 40                 # total turns by both players; reaching this is a draw
+  max_shield: 6                 # shield cannot stack above this
+  start_hand: 3                 # cards each player starts with
+  max_hand: 6                   # cards beyond this are burned (discarded)
+  draw_per_turn: 1              # cards drawn at the start of your turn (not on turn 1)
+  second_player_extra_cards: 0  # compensation for moving second (tuned by simulation: 1 was too much)
+
+# weight = how likely a card is to be drawn (default 1). Bigger = more common.
+cards:
+  strike:
+    cost: 1
+    damage: 3
+  fireball:
+    cost: 3
+    damage: 7
+  heal:
+    cost: 2
+    heal: 4
+  shield:
+    cost: 1
+    shield: 3
+  drain:
+    cost: 3
+    damage: 3
+    heal: 3

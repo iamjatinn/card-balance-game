@@ -1,0 +1,8 @@
+pyyaml
+pytest
+numpy
+gymnasium
+# Training libraries. Install torch (CPU build) first, then these:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+stable-baselines3
+sb3-contrib

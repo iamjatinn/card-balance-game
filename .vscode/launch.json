@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Watch a game (random vs random)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "manaduel.cli",
+      "args": ["watch", "--seed", "3"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Run all tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-v"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
