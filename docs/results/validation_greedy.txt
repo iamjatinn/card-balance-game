@@ -1,0 +1,66 @@
+﻿Validation with 'greedy': deltas [1, 2, 4, -1, -2], 10000 games per measurement, 2 rep(s), 20 no-change repeats, seed 0
+
+Planted-change validation (10000 games per measurement, alpha 0.05, Bonferroni over cards)
+
+planted change             size rep  power change      z  detected  attributed
+strike.damage 3->4         +33%   0         +4.3%    9.8       yes         yes
+strike.damage 3->4         +33%   1         +3.5%    7.9       yes         yes
+strike.damage 3->5         +67%   0         +8.5%   19.0       yes         yes
+strike.damage 3->5         +67%   1         +7.8%   17.3       yes         yes
+strike.damage 3->7        +133%   0        +16.1%   38.8       yes         yes
+strike.damage 3->7        +133%   1        +16.2%   39.6       yes         yes
+strike.damage 3->2         -33%   0         -1.6%   -4.0       yes         yes
+strike.damage 3->2         -33%   1         -1.9%   -4.6       yes         yes
+strike.damage 3->1         -67%   0         -2.1%   -5.3       yes         yes
+strike.damage 3->1         -67%   1         -2.1%   -5.3       yes         yes
+fireball.damage 7->8       +14%   0         +1.9%    4.6       yes         yes
+fireball.damage 7->8       +14%   1         +1.8%    4.1       yes         yes
+fireball.damage 7->9       +29%   0         +3.3%    7.7       yes         yes
+fireball.damage 7->9       +29%   1         +2.6%    6.2       yes          no
+fireball.damage 7->11      +57%   0         +5.9%   14.5       yes         yes
+fireball.damage 7->11      +57%   1         +5.8%   14.0       yes         yes
+fireball.damage 7->6       -14%   0         -3.5%   -8.7       yes         yes
+fireball.damage 7->6       -14%   1         -3.5%   -8.5       yes         yes
+fireball.damage 7->5       -29%   0         -4.1%  -11.2       yes         yes
+fireball.damage 7->5       -29%   1         -4.7%  -12.8       yes         yes
+heal.heal 4->5             +25%   0         +1.3%    3.3       yes          no
+heal.heal 4->5             +25%   1         +1.6%    4.1       yes         yes
+heal.heal 4->6             +50%   0         +2.4%    6.1       yes          no
+heal.heal 4->6             +50%   1         +2.0%    5.3       yes         yes
+heal.heal 4->8            +100%   0         +3.1%    8.6       yes          no
+heal.heal 4->8            +100%   1         +2.8%    7.6       yes          no
+heal.heal 4->3             -25%   0         -1.0%   -2.3        no         yes
+heal.heal 4->3             -25%   1         -1.3%   -3.1       yes         yes
+heal.heal 4->2             -50%   0         -4.6%  -10.7       yes         yes
+heal.heal 4->2             -50%   1         -4.6%  -10.5       yes         yes
+shield.shield 3->4         +33%   0         +0.7%    1.8        no          no
+shield.shield 3->4         +33%   1         +0.4%    1.0        no          no
+shield.shield 3->5         +67%   0         +0.6%    1.6        no          no
+shield.shield 3->5         +67%   1         +0.8%    1.9        no          no
+shield.shield 3->7        +133%   0         +0.7%    1.8        no          no
+shield.shield 3->7        +133%   1         +1.2%    3.1       yes          no
+shield.shield 3->2         -33%   0         -1.1%   -2.6       yes          no
+shield.shield 3->2         -33%   1         -1.5%   -3.6       yes          no
+shield.shield 3->1         -67%   0         -3.0%   -7.2       yes         yes
+shield.shield 3->1         -67%   1         -2.4%   -5.6       yes         yes
+drain.damage 3->4          +33%   0         +2.5%    5.7       yes         yes
+drain.damage 3->4          +33%   1         +2.5%    5.7       yes         yes
+drain.damage 3->5          +67%   0         +7.5%   17.5       yes         yes
+drain.damage 3->5          +67%   1         +7.3%   16.9       yes         yes
+drain.damage 3->7         +133%   0        +12.6%   30.2       yes         yes
+drain.damage 3->7         +133%   1        +12.6%   30.1       yes         yes
+drain.damage 3->2          -33%   0         -2.0%   -4.9       yes         yes
+drain.damage 3->2          -33%   1         -1.5%   -3.7       yes         yes
+drain.damage 3->1          -67%   0         -3.5%   -9.0       yes         yes
+drain.damage 3->1          -67%   1         -3.0%   -7.7       yes         yes
+
+Detection by size of the planted change:
+  under 25%    detected   4/4   ( 100%)   attributed   4/4   ( 100%)
+  25% to 50%   detected  17/20  (  85%)   attributed  14/20  (  70%)
+  50% or more  detected  23/26  (  88%)   attributed  19/26  (  73%)
+  all          detected  44/50  (  88%)
+
+False alarms with NO change planted: 0/20 comparisons (a perfectly calibrated test would give about 5%)
+
+Saved runs/validation.csv
+

@@ -13,6 +13,8 @@ from manaduel.analysis.autobalance import autobalance, config_to_yaml, format_tr
 from manaduel.analysis.card_effects import collect, estimate_effects
 from manaduel.analysis.card_effects import format_report as format_effects
 from manaduel.analysis.sweep import format_table, parse_set, run_sweep, write_csv
+from manaduel.analysis.validate import format_validation, run_validation
+from manaduel.analysis.validate import write_csv as write_validation_csv
 from manaduel.engine.game import play_game
 from manaduel.engine.rules import load_game_config
 from manaduel.sim.replay import save_replay
@@ -61,6 +63,18 @@ def _effects(args, config, factories) -> None:
     print(f"Mirror matches of '{args.bot}': {args.n} games, seed {args.seed}\n")
     games = collect(config, factory, args.n, args.seed)
     print(format_effects(estimate_effects(games)))
+
+
+def _validate(args, config, factories) -> None:
+    factory = _pick(factories, args.bot)
+    print(f"Validation with '{args.bot}': deltas {args.deltas}, {args.n} games per measurement, "
+          f"{args.reps} rep(s), {args.null_reps} no-change repeats, seed {args.seed}\n", flush=True)
+    result = run_validation(config, factory, tuple(args.deltas), args.n, args.baseline_n,
+                            args.reps, args.null_reps, args.seed, workers=args.workers)
+    print(format_validation(result))
+    if args.csv:
+        write_validation_csv(result, args.csv)
+        print(f"\nSaved {args.csv}")
 
 
 def _autobalance(args, config, factories) -> None:
@@ -141,12 +155,24 @@ def main(argv=None) -> None:
     ab.add_argument("--verify-seed", type=int, default=99991, help="new seed for the final check")
     ab.add_argument("--out", help="write the balanced config to this YAML file")
 
+    va = sub.add_parser("validate", help="plant known card changes and measure whether the tool detects them")
+    va.add_argument("--bot", default="greedy")
+    va.add_argument("--deltas", nargs="+", type=int, default=[1, 2, 4, -1, -2],
+                    help="changes to each card's main stat (default: +1 +2 +4 -1 -2)")
+    va.add_argument("--n", type=int, default=10000, help="games per measurement")
+    va.add_argument("--baseline-n", type=int, default=20000, help="games for the baseline measurement")
+    va.add_argument("--reps", type=int, default=2, help="independent repeats per planted change")
+    va.add_argument("--null-reps", type=int, default=20, help="no-change repeats for the false-alarm rate")
+    va.add_argument("--seed", type=int, default=0)
+    va.add_argument("--workers", type=int, default=None, help="parallel processes (default: most cores)")
+    va.add_argument("--csv", help="also write the trials to this CSV file")
+
     args = parser.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
     config = load_game_config(Path(args.config)) if args.config else load_game_config()
     factories = _factories(getattr(args, "ppo", None))
     handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
-                "sweep": _sweep, "autobalance": _autobalance}
+                "sweep": _sweep, "autobalance": _autobalance, "validate": _validate}
     handlers[args.command](args, config, factories)
 
 

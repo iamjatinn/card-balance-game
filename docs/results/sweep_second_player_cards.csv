@@ -1,0 +1,7 @@
+rules.second_player_extra_cards,bot,games,first_mover,first_mover_low,first_mover_high,draw_rate,avg_turns
+1,greedy,2000,0.3453,0.3225,0.3688,0.1920,24.55
+1,defensive,2000,0.3224,0.2990,0.3468,0.2680,26.63
+0,greedy,2000,0.4141,0.3901,0.4386,0.2080,25.28
+0,defensive,2000,0.4284,0.4033,0.4539,0.2670,27.18
+-1,greedy,2000,0.5899,0.5652,0.6142,0.2270,25.93
+-1,defensive,2000,0.6042,0.5785,0.6293,0.2900,27.51

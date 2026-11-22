@@ -1,0 +1,55 @@
+﻿Autobalance with 'greedy': 10000 games per measurement, up to 6 steps, seed 0
+
+step 1: flagged strike -2.6%, fireball +8.7%, shield -5.7%
+    fireball.damage: 7 -> 6                              -> squared effect 0.00740, draws 35.8%  (rejected: too many draws)
+    fireball.cost: 3 -> 4                                -> squared effect 0.01626, draws 19.4%
+    shield.shield: 3 -> 4                                -> squared effect 0.01107, draws 25.4%  (rejected: too many draws)
+    strike.damage: 3 -> 4                                -> squared effect 0.01431, draws 14.8%
+    fireball.damage: 7 -> 6 + shield.shield: 3 -> 4      -> squared effect 0.00788, draws 38.4%  (rejected: too many draws)
+    fireball.damage: 7 -> 6 + strike.damage: 3 -> 4      -> squared effect 0.01055, draws 24.4%
+    fireball.cost: 3 -> 4 + shield.shield: 3 -> 4        -> squared effect 0.01583, draws 22.2%
+    fireball.cost: 3 -> 4 + strike.damage: 3 -> 4        -> squared effect 0.01716, draws 12.8%
+    shield.shield: 3 -> 4 + strike.damage: 3 -> 4        -> squared effect 0.01073, draws 18.4%
+    accepted: fireball.damage: 7 -> 6 + strike.damage: 3 -> 4
+step 2: flagged fireball +4.4%, shield -9.0%, drain +2.1%
+    shield.shield: 3 -> 4                                -> squared effect 0.00785, draws 29.2%  (rejected: too many draws)
+    fireball.damage: 6 -> 5                              -> squared effect 0.01196, draws 37.8%  (rejected: too many draws)
+    fireball.cost: 3 -> 4                                -> squared effect 0.01524, draws 21.5%
+    drain.damage: 3 -> 2                                 -> squared effect 0.00841, draws 34.8%  (rejected: too many draws)
+    drain.cost: 3 -> 4                                   -> squared effect 0.01060, draws 23.8%
+    shield.shield: 3 -> 4 + fireball.damage: 6 -> 5      -> squared effect 0.00901, draws 44.6%  (rejected: too many draws)
+    shield.shield: 3 -> 4 + fireball.cost: 3 -> 4        -> squared effect 0.01259, draws 26.3%  (rejected: too many draws)
+    shield.shield: 3 -> 4 + drain.damage: 3 -> 2         -> squared effect 0.00574, draws 40.4%  (rejected: too many draws)
+    shield.shield: 3 -> 4 + drain.cost: 3 -> 4           -> squared effect 0.00666, draws 29.0%  (rejected: too many draws)
+    fireball.damage: 6 -> 5 + drain.damage: 3 -> 2       -> squared effect 0.00576, draws 51.0%  (rejected: too many draws)
+    fireball.damage: 6 -> 5 + drain.cost: 3 -> 4         -> squared effect 0.00723, draws 37.6%  (rejected: too many draws)
+    fireball.cost: 3 -> 4 + drain.damage: 3 -> 2         -> squared effect 0.01325, draws 30.8%  (rejected: too many draws)
+    fireball.cost: 3 -> 4 + drain.cost: 3 -> 4           -> squared effect 0.01027, draws 21.4%
+
+step  change                                               flagged       worst card 1st player  draws
+   0  (starting game)                                            3   fireball +8.7%      45.9%  22.4%
+   1  fireball.damage: 7 -> 6 + strike.damage: 3 -> 4            3     shield -9.0%      43.1%  24.4%
+Stopped: no change (single or paired) improves the balance enough
+
+Final card power on the tuning games:
+Card power from 10000 mirror games (win-probability change per extra starting copy, vs the median card)
+      card   effect       95% interval       z  verdict
+  fireball    +4.4% [  +3.3%,   +5.5%]     7.9  TOO STRONG
+     drain    +2.1% [  +1.0%,   +3.2%]     3.8  TOO STRONG
+    strike    +0.0% (the reference card)
+      heal    -0.7% [  -1.8%,   +0.3%]    -1.3  ok
+    shield    -9.0% [ -10.0%,   -8.0%]   -16.9  TOO WEAK
+First player's win rate with identical hands: 43.1% (+/- 0.8%)
+
+Check on NEW games with a different bot ('defensive', seed 99991):
+Card power from 10000 mirror games (win-probability change per extra starting copy, vs the median card)
+      card   effect       95% interval       z  verdict
+  fireball    +3.8% [  +2.8%,   +4.9%]     7.1  TOO STRONG
+     drain    +1.0% [  -0.0%,   +2.1%]     1.9  ok
+    strike    +0.0% (the reference card)
+      heal    -1.4% [  -2.4%,   -0.4%]    -2.7  ok
+    shield    -8.0% [  -9.0%,   -7.0%]   -15.7  TOO WEAK
+First player's win rate with identical hands: 44.0% (+/- 0.8%)
+
+Saved the balanced config to configs/cards_balanced.yaml
+
