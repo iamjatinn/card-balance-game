@@ -30,7 +30,7 @@ from dataclasses import dataclass, replace
 
 import numpy as np
 
-from manaduel.agents.registry import BOT_FACTORIES
+from manaduel.agents.registry import ALL_BOT_FACTORIES
 from manaduel.analysis.card_effects import collect, estimate_effects
 from manaduel.analysis.sweep import apply_overrides
 from manaduel.engine.rules import GameConfig
@@ -123,7 +123,7 @@ def _evaluate_job(job) -> Eval:
     config, bots, n_games, seed, weights = job
     effects, draws, firsts, flagged = [], [], [], set()
     for bot in bots:
-        games = collect(config, BOT_FACTORIES[bot], n_games, seed)
+        games = collect(config, ALL_BOT_FACTORIES[bot], n_games, seed)
         report = estimate_effects(games)
         effects.append([e.effect for e in report.effects])
         draws.append(float(np.mean(games.score0 == 0.5)))
