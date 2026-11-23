@@ -11,6 +11,14 @@ class PlayerState:
     # How many copies of each card type this player holds, in cards.yaml order.
     # For example (2, 0, 1, 0, 0) = two strikes and one heal.
     hand: tuple[int, ...] = ()
+    # --- used only by the extra mechanics; all stay at their defaults in the original game ---
+    poison: int = 0          # counters: at the start of this player's turn they lose this much HP, then it drops by 1
+    combo: int = 0           # cards this player has played so far this turn
+    fatigue: int = 0         # failed draws from an empty deck so far
+    # Cumulative copies played of each card type (known to the opponent: this is the "memory" signal).
+    played: tuple[int, ...] = ()
+    # Cards left in this player's deck, per card type. Empty means endless random draws.
+    deck: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)

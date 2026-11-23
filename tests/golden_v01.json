@@ -1,0 +1,2602 @@
+[
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 0,
+"winner": 1,
+"turns": 30,
+"events": 64,
+"hp": [
+-1,
+10
+],
+"digest": "2751f31d24fa9abe"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 1,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+14,
+13
+],
+"digest": "030e001765af0812"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 2,
+"winner": 0,
+"turns": 19,
+"events": 41,
+"hp": [
+11,
+0
+],
+"digest": "d8e13f42a9eca6a0"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 3,
+"winner": 1,
+"turns": 20,
+"events": 43,
+"hp": [
+-2,
+11
+],
+"digest": "6295f004c7f94930"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 4,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+13,
+13
+],
+"digest": "a8c5160895b1c649"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 5,
+"winner": 1,
+"turns": 26,
+"events": 56,
+"hp": [
+0,
+15
+],
+"digest": "7936beeed7fab69b"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 6,
+"winner": 0,
+"turns": 13,
+"events": 29,
+"hp": [
+7,
+-2
+],
+"digest": "8bd9cda81f487100"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 7,
+"winner": 0,
+"turns": 31,
+"events": 66,
+"hp": [
+14,
+0
+],
+"digest": "697736f13585d2a7"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 8,
+"winner": 0,
+"turns": 11,
+"events": 23,
+"hp": [
+8,
+-1
+],
+"digest": "07c715f5688a1e48"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 9,
+"winner": null,
+"turns": 40,
+"events": 82,
+"hp": [
+14,
+20
+],
+"digest": "cd0dbb61398bc8b4"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 10,
+"winner": 0,
+"turns": 23,
+"events": 50,
+"hp": [
+5,
+-2
+],
+"digest": "aa24fae166bc972a"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 11,
+"winner": 1,
+"turns": 32,
+"events": 68,
+"hp": [
+-1,
+10
+],
+"digest": "40b269abb2f27c03"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 12,
+"winner": 1,
+"turns": 14,
+"events": 28,
+"hp": [
+-2,
+1
+],
+"digest": "41376091cf913516"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 13,
+"winner": 1,
+"turns": 30,
+"events": 64,
+"hp": [
+-2,
+6
+],
+"digest": "112f840dc8d9771b"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 14,
+"winner": 1,
+"turns": 24,
+"events": 52,
+"hp": [
+-2,
+12
+],
+"digest": "f4b49f70a269796a"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 15,
+"winner": 0,
+"turns": 23,
+"events": 50,
+"hp": [
+9,
+0
+],
+"digest": "b0539cb8194126f4"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 16,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+9,
+17
+],
+"digest": "d5d2ef6ea3f56661"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 17,
+"winner": 0,
+"turns": 11,
+"events": 21,
+"hp": [
+16,
+-1
+],
+"digest": "cff61b1fad59e0e5"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 18,
+"winner": 1,
+"turns": 22,
+"events": 48,
+"hp": [
+-2,
+7
+],
+"digest": "03ed13cda5f0ec8a"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 19,
+"winner": 0,
+"turns": 29,
+"events": 62,
+"hp": [
+4,
+-2
+],
+"digest": "e6c662511f350a7b"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 20,
+"winner": 1,
+"turns": 40,
+"events": 84,
+"hp": [
+-4,
+14
+],
+"digest": "3270470fbbde4318"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 21,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+20,
+18
+],
+"digest": "681b46804195911f"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 22,
+"winner": 0,
+"turns": 15,
+"events": 32,
+"hp": [
+5,
+-2
+],
+"digest": "055c31846c903f60"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 23,
+"winner": 1,
+"turns": 28,
+"events": 60,
+"hp": [
+-2,
+6
+],
+"digest": "fdfc97a7708e0a67"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 24,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+10,
+9
+],
+"digest": "fd775faa2fcbd32c"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 25,
+"winner": 1,
+"turns": 16,
+"events": 33,
+"hp": [
+-1,
+5
+],
+"digest": "8a48ca2ca1bca27a"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 26,
+"winner": 0,
+"turns": 39,
+"events": 82,
+"hp": [
+11,
+-3
+],
+"digest": "af01f5dc37357ca9"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 27,
+"winner": 0,
+"turns": 9,
+"events": 19,
+"hp": [
+4,
+-1
+],
+"digest": "b8b85f08a6b766f4"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 28,
+"winner": 1,
+"turns": 12,
+"events": 27,
+"hp": [
+-2,
+5
+],
+"digest": "dd6249a54f3e1d9a"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 29,
+"winner": 1,
+"turns": 28,
+"events": 60,
+"hp": [
+-2,
+2
+],
+"digest": "3523142c8367332e"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 30,
+"winner": 1,
+"turns": 12,
+"events": 27,
+"hp": [
+0,
+2
+],
+"digest": "0c482d4f785a4994"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 31,
+"winner": null,
+"turns": 40,
+"events": 78,
+"hp": [
+20,
+17
+],
+"digest": "afcbae78f9122afd"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 32,
+"winner": 0,
+"turns": 19,
+"events": 40,
+"hp": [
+6,
+0
+],
+"digest": "c0dd817a01f7ecc7"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 33,
+"winner": 1,
+"turns": 28,
+"events": 60,
+"hp": [
+-2,
+11
+],
+"digest": "4fe8eb7bfe332022"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 34,
+"winner": 1,
+"turns": 34,
+"events": 72,
+"hp": [
+0,
+12
+],
+"digest": "de84ffdcbfa796ae"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 35,
+"winner": null,
+"turns": 40,
+"events": 80,
+"hp": [
+11,
+14
+],
+"digest": "6ac26b0619de03ec"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 36,
+"winner": 1,
+"turns": 20,
+"events": 44,
+"hp": [
+0,
+6
+],
+"digest": "e0f76680fb480d40"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 37,
+"winner": 1,
+"turns": 28,
+"events": 59,
+"hp": [
+-1,
+20
+],
+"digest": "b022c6e8173e5670"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 38,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+13,
+7
+],
+"digest": "7dcd748ac0b151f5"
+},
+{
+"a": "greedy",
+"b": "defensive",
+"seed": 39,
+"winner": 1,
+"turns": 34,
+"events": 72,
+"hp": [
+-1,
+15
+],
+"digest": "2a8007aba9cacf20"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 0,
+"winner": 0,
+"turns": 13,
+"events": 29,
+"hp": [
+12,
+0
+],
+"digest": "8000fbc5004d1d8c"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 1,
+"winner": null,
+"turns": 40,
+"events": 83,
+"hp": [
+11,
+10
+],
+"digest": "8c046e3724742fc0"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 2,
+"winner": 0,
+"turns": 25,
+"events": 54,
+"hp": [
+11,
+0
+],
+"digest": "23779299a3f368be"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 3,
+"winner": 1,
+"turns": 20,
+"events": 44,
+"hp": [
+-2,
+13
+],
+"digest": "1d503f4760575661"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 4,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+15,
+17
+],
+"digest": "df7075dd3f9d592c"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 5,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+5,
+4
+],
+"digest": "4f98a5467a007199"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 6,
+"winner": 0,
+"turns": 13,
+"events": 28,
+"hp": [
+4,
+0
+],
+"digest": "53846a6e62764b8d"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 7,
+"winner": 0,
+"turns": 29,
+"events": 61,
+"hp": [
+13,
+-2
+],
+"digest": "4ad55a06c5f86ef5"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 8,
+"winner": 0,
+"turns": 11,
+"events": 23,
+"hp": [
+8,
+-1
+],
+"digest": "f96682fd5b68a34b"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 9,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+14,
+20
+],
+"digest": "9fea286c6d1a920b"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 10,
+"winner": 0,
+"turns": 23,
+"events": 50,
+"hp": [
+5,
+-2
+],
+"digest": "301cb7ecc13abf75"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 11,
+"winner": 1,
+"turns": 32,
+"events": 68,
+"hp": [
+-1,
+8
+],
+"digest": "ef39c44290215095"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 12,
+"winner": 1,
+"turns": 10,
+"events": 19,
+"hp": [
+0,
+4
+],
+"digest": "7cf4d3a8ff3d7d10"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 13,
+"winner": 1,
+"turns": 32,
+"events": 68,
+"hp": [
+0,
+9
+],
+"digest": "fa7e1030f55296d7"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 14,
+"winner": 1,
+"turns": 24,
+"events": 52,
+"hp": [
+-2,
+12
+],
+"digest": "dc3f7d212207fd48"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 15,
+"winner": 0,
+"turns": 23,
+"events": 50,
+"hp": [
+9,
+0
+],
+"digest": "7da0f704c05a9c63"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 16,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+6,
+20
+],
+"digest": "0dc4f0775b13fbc8"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 17,
+"winner": 0,
+"turns": 9,
+"events": 16,
+"hp": [
+7,
+0
+],
+"digest": "ee3cc2163f0d5772"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 18,
+"winner": 1,
+"turns": 22,
+"events": 48,
+"hp": [
+-2,
+7
+],
+"digest": "9ac047631cb67149"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 19,
+"winner": 0,
+"turns": 25,
+"events": 54,
+"hp": [
+1,
+0
+],
+"digest": "7340d3571d5a4761"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 20,
+"winner": 1,
+"turns": 40,
+"events": 84,
+"hp": [
+-3,
+9
+],
+"digest": "05306b92d6998e90"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 21,
+"winner": null,
+"turns": 40,
+"events": 83,
+"hp": [
+17,
+16
+],
+"digest": "5b81e5c76eb08091"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 22,
+"winner": 1,
+"turns": 16,
+"events": 34,
+"hp": [
+-1,
+4
+],
+"digest": "f5f97f0145a422f2"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 23,
+"winner": 0,
+"turns": 27,
+"events": 58,
+"hp": [
+1,
+0
+],
+"digest": "efbfe282e7d3e155"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 24,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+10,
+9
+],
+"digest": "52d17afe7f7ac342"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 25,
+"winner": 1,
+"turns": 14,
+"events": 31,
+"hp": [
+-1,
+10
+],
+"digest": "9f1acd3383f3f86e"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 26,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+8,
+1
+],
+"digest": "93b8fbb538f52e59"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 27,
+"winner": 0,
+"turns": 9,
+"events": 20,
+"hp": [
+8,
+-1
+],
+"digest": "f5fe31069c0d307c"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 28,
+"winner": 1,
+"turns": 10,
+"events": 20,
+"hp": [
+0,
+4
+],
+"digest": "f7b764dda2d32b7d"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 29,
+"winner": 1,
+"turns": 28,
+"events": 60,
+"hp": [
+-1,
+2
+],
+"digest": "0ae8ab2f47d192be"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 30,
+"winner": 1,
+"turns": 12,
+"events": 27,
+"hp": [
+0,
+2
+],
+"digest": "01985952f22a4ada"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 31,
+"winner": null,
+"turns": 40,
+"events": 77,
+"hp": [
+17,
+20
+],
+"digest": "122c65732764b4ac"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 32,
+"winner": 1,
+"turns": 18,
+"events": 39,
+"hp": [
+0,
+5
+],
+"digest": "a80cc91c25b34f36"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 33,
+"winner": 1,
+"turns": 28,
+"events": 60,
+"hp": [
+-2,
+11
+],
+"digest": "455abdd33096ba42"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 34,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+1,
+12
+],
+"digest": "9c522ad0be6b7689"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 35,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+11,
+20
+],
+"digest": "d2ed372566fef561"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 36,
+"winner": 1,
+"turns": 22,
+"events": 48,
+"hp": [
+-6,
+2
+],
+"digest": "6d3158d6798ce820"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 37,
+"winner": 1,
+"turns": 32,
+"events": 68,
+"hp": [
+-1,
+19
+],
+"digest": "6d06438a2ebbef98"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 38,
+"winner": null,
+"turns": 40,
+"events": 83,
+"hp": [
+13,
+4
+],
+"digest": "800834b0d43d121d"
+},
+{
+"a": "defensive",
+"b": "greedy",
+"seed": 39,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+5,
+20
+],
+"digest": "af782f22f2004803"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 0,
+"winner": 1,
+"turns": 20,
+"events": 40,
+"hp": [
+-2,
+13
+],
+"digest": "262481409bf3859b"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 1,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+10,
+14
+],
+"digest": "de1064ca63623951"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 2,
+"winner": 1,
+"turns": 12,
+"events": 23,
+"hp": [
+0,
+13
+],
+"digest": "33808c9e738885a1"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 3,
+"winner": 1,
+"turns": 16,
+"events": 32,
+"hp": [
+-2,
+17
+],
+"digest": "17f26975704d38ce"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 4,
+"winner": null,
+"turns": 40,
+"events": 83,
+"hp": [
+6,
+17
+],
+"digest": "9118306185526118"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 5,
+"winner": 1,
+"turns": 26,
+"events": 56,
+"hp": [
+0,
+8
+],
+"digest": "acf22c748d868050"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 6,
+"winner": 1,
+"turns": 20,
+"events": 39,
+"hp": [
+-2,
+13
+],
+"digest": "a182506b38541ce5"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 7,
+"winner": 1,
+"turns": 38,
+"events": 77,
+"hp": [
+0,
+2
+],
+"digest": "5f1e304b6dbb6696"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 8,
+"winner": 0,
+"turns": 17,
+"events": 37,
+"hp": [
+4,
+0
+],
+"digest": "f619b80b7e885f62"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 9,
+"winner": 1,
+"turns": 16,
+"events": 33,
+"hp": [
+-3,
+17
+],
+"digest": "0270285ded9ddcb0"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 10,
+"winner": 1,
+"turns": 34,
+"events": 68,
+"hp": [
+-2,
+4
+],
+"digest": "c5df21a092cd63d4"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 11,
+"winner": 1,
+"turns": 12,
+"events": 18,
+"hp": [
+0,
+13
+],
+"digest": "ddf5d28bed35bdeb"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 12,
+"winner": 1,
+"turns": 12,
+"events": 22,
+"hp": [
+-1,
+11
+],
+"digest": "5c6846640e1e24b0"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 13,
+"winner": 1,
+"turns": 28,
+"events": 57,
+"hp": [
+-6,
+9
+],
+"digest": "c887c8bb0b0afff8"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 14,
+"winner": 1,
+"turns": 10,
+"events": 18,
+"hp": [
+0,
+14
+],
+"digest": "a3589609bbe29e3b"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 15,
+"winner": 1,
+"turns": 14,
+"events": 30,
+"hp": [
+0,
+11
+],
+"digest": "25bf64b12e7d69b4"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 16,
+"winner": 1,
+"turns": 32,
+"events": 65,
+"hp": [
+-3,
+9
+],
+"digest": "7f1a345d06cc433a"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 17,
+"winner": 1,
+"turns": 12,
+"events": 22,
+"hp": [
+-1,
+12
+],
+"digest": "71aeb3680015b8a1"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 18,
+"winner": 1,
+"turns": 20,
+"events": 43,
+"hp": [
+-2,
+7
+],
+"digest": "819b7bf768793729"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 19,
+"winner": 1,
+"turns": 30,
+"events": 63,
+"hp": [
+-3,
+3
+],
+"digest": "c0d3df3f021f5453"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 20,
+"winner": 1,
+"turns": 40,
+"events": 83,
+"hp": [
+0,
+10
+],
+"digest": "327e4bfc0c46efd2"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 21,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+16,
+10
+],
+"digest": "194234a4be019014"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 22,
+"winner": 1,
+"turns": 16,
+"events": 33,
+"hp": [
+-2,
+11
+],
+"digest": "8fd1e26a5b930a08"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 23,
+"winner": 1,
+"turns": 16,
+"events": 33,
+"hp": [
+-2,
+7
+],
+"digest": "994048c165c9d882"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 24,
+"winner": 1,
+"turns": 22,
+"events": 45,
+"hp": [
+-2,
+11
+],
+"digest": "30a26b3ec555e4d2"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 25,
+"winner": 1,
+"turns": 12,
+"events": 23,
+"hp": [
+0,
+20
+],
+"digest": "b337a975b89bb73c"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 26,
+"winner": 1,
+"turns": 18,
+"events": 35,
+"hp": [
+0,
+13
+],
+"digest": "5fdd609799965164"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 27,
+"winner": 0,
+"turns": 37,
+"events": 77,
+"hp": [
+1,
+0
+],
+"digest": "0edb8f68a521320c"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 28,
+"winner": 1,
+"turns": 10,
+"events": 17,
+"hp": [
+-3,
+10
+],
+"digest": "a092efe47fe05b7a"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 29,
+"winner": 1,
+"turns": 18,
+"events": 38,
+"hp": [
+0,
+13
+],
+"digest": "45beb865ae708c18"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 30,
+"winner": 1,
+"turns": 12,
+"events": 24,
+"hp": [
+0,
+6
+],
+"digest": "30617ebc7ad234b2"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 31,
+"winner": null,
+"turns": 40,
+"events": 79,
+"hp": [
+20,
+20
+],
+"digest": "c8d60dcdd4bd0f50"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 32,
+"winner": 1,
+"turns": 18,
+"events": 38,
+"hp": [
+-6,
+18
+],
+"digest": "3064a6fb1f22b0ba"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 33,
+"winner": 1,
+"turns": 18,
+"events": 35,
+"hp": [
+-2,
+19
+],
+"digest": "a96fc13258a1e2f1"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 34,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+1,
+9
+],
+"digest": "dd05d2f1449d8aee"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 35,
+"winner": 1,
+"turns": 20,
+"events": 36,
+"hp": [
+0,
+17
+],
+"digest": "f3675564935fedc8"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 36,
+"winner": 1,
+"turns": 18,
+"events": 36,
+"hp": [
+-4,
+17
+],
+"digest": "08fb01e7d18563a6"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 37,
+"winner": 1,
+"turns": 28,
+"events": 57,
+"hp": [
+-2,
+17
+],
+"digest": "4caae0ae33e833fd"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 38,
+"winner": null,
+"turns": 40,
+"events": 79,
+"hp": [
+13,
+8
+],
+"digest": "2cbf43e45a4af24c"
+},
+{
+"a": "random",
+"b": "greedy",
+"seed": 39,
+"winner": 1,
+"turns": 22,
+"events": 46,
+"hp": [
+-1,
+16
+],
+"digest": "46c85e5d0764c5df"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 0,
+"winner": 1,
+"turns": 20,
+"events": 41,
+"hp": [
+-2,
+10
+],
+"digest": "987879656ca8f049"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 1,
+"winner": 1,
+"turns": 22,
+"events": 34,
+"hp": [
+0,
+13
+],
+"digest": "d73e2ab50acb24e7"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 2,
+"winner": 0,
+"turns": 11,
+"events": 22,
+"hp": [
+3,
+0
+],
+"digest": "852bebe32b12583d"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 3,
+"winner": 1,
+"turns": 18,
+"events": 34,
+"hp": [
+-6,
+14
+],
+"digest": "4734779de32e43f0"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 4,
+"winner": 1,
+"turns": 20,
+"events": 38,
+"hp": [
+-2,
+19
+],
+"digest": "7b298f6eb539667c"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 5,
+"winner": 1,
+"turns": 22,
+"events": 33,
+"hp": [
+-2,
+19
+],
+"digest": "7b375628275fb676"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 6,
+"winner": 1,
+"turns": 12,
+"events": 24,
+"hp": [
+0,
+1
+],
+"digest": "52ad6b061b428bdb"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 7,
+"winner": 1,
+"turns": 30,
+"events": 59,
+"hp": [
+-2,
+3
+],
+"digest": "ea53578b2b5db094"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 8,
+"winner": 0,
+"turns": 11,
+"events": 22,
+"hp": [
+4,
+-1
+],
+"digest": "df8c664e2571fec9"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 9,
+"winner": 1,
+"turns": 12,
+"events": 24,
+"hp": [
+0,
+12
+],
+"digest": "1f54fdfc3ae6fd3e"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 10,
+"winner": 1,
+"turns": 18,
+"events": 36,
+"hp": [
+0,
+11
+],
+"digest": "7f8c204a09f9625d"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 11,
+"winner": 1,
+"turns": 26,
+"events": 48,
+"hp": [
+-1,
+19
+],
+"digest": "86209f02fe6bc088"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 12,
+"winner": 1,
+"turns": 10,
+"events": 18,
+"hp": [
+-1,
+1
+],
+"digest": "f116aeec146c0f9d"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 13,
+"winner": 1,
+"turns": 16,
+"events": 32,
+"hp": [
+0,
+12
+],
+"digest": "87694b73503dc917"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 14,
+"winner": 1,
+"turns": 10,
+"events": 18,
+"hp": [
+-1,
+11
+],
+"digest": "21118a56f91e53fa"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 15,
+"winner": 1,
+"turns": 18,
+"events": 38,
+"hp": [
+-1,
+9
+],
+"digest": "3cc0ab8a8bdac998"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 16,
+"winner": 1,
+"turns": 14,
+"events": 27,
+"hp": [
+-1,
+14
+],
+"digest": "2f9db01cec1e2426"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 17,
+"winner": 0,
+"turns": 11,
+"events": 21,
+"hp": [
+16,
+-1
+],
+"digest": "cff61b1fad59e0e5"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 18,
+"winner": 1,
+"turns": 16,
+"events": 32,
+"hp": [
+0,
+10
+],
+"digest": "7d58fcd7aacbdc24"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 19,
+"winner": 1,
+"turns": 16,
+"events": 31,
+"hp": [
+-5,
+16
+],
+"digest": "2aa09a31231fe590"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 20,
+"winner": 1,
+"turns": 22,
+"events": 42,
+"hp": [
+-1,
+18
+],
+"digest": "3fe1c58f212b5db2"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 21,
+"winner": 1,
+"turns": 14,
+"events": 26,
+"hp": [
+0,
+19
+],
+"digest": "a6386c38de191546"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 22,
+"winner": 1,
+"turns": 14,
+"events": 27,
+"hp": [
+-5,
+5
+],
+"digest": "709f134734fadae0"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 23,
+"winner": 1,
+"turns": 12,
+"events": 24,
+"hp": [
+0,
+10
+],
+"digest": "f348e92473fc72b1"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 24,
+"winner": 1,
+"turns": 22,
+"events": 45,
+"hp": [
+-4,
+11
+],
+"digest": "5232c1141a347104"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 25,
+"winner": 1,
+"turns": 14,
+"events": 26,
+"hp": [
+-1,
+8
+],
+"digest": "7eea629165dacbca"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 26,
+"winner": 1,
+"turns": 18,
+"events": 36,
+"hp": [
+0,
+10
+],
+"digest": "77f39a1f4eb28366"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 27,
+"winner": 0,
+"turns": 9,
+"events": 17,
+"hp": [
+1,
+-1
+],
+"digest": "320545f1f58a7146"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 28,
+"winner": 1,
+"turns": 10,
+"events": 20,
+"hp": [
+0,
+5
+],
+"digest": "40bb664309e65135"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 29,
+"winner": 1,
+"turns": 12,
+"events": 24,
+"hp": [
+-3,
+12
+],
+"digest": "e47b2c92f3a0a333"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 30,
+"winner": 1,
+"turns": 12,
+"events": 24,
+"hp": [
+-4,
+2
+],
+"digest": "95edfdcf6897e88a"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 31,
+"winner": null,
+"turns": 40,
+"events": 71,
+"hp": [
+7,
+17
+],
+"digest": "5da76d23509d3a7f"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 32,
+"winner": 1,
+"turns": 16,
+"events": 30,
+"hp": [
+-5,
+6
+],
+"digest": "2f69f428365bac24"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 33,
+"winner": 1,
+"turns": 10,
+"events": 20,
+"hp": [
+0,
+12
+],
+"digest": "8f9aaf1199401065"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 34,
+"winner": 1,
+"turns": 14,
+"events": 27,
+"hp": [
+-4,
+13
+],
+"digest": "ebd83f488e527f1e"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 35,
+"winner": 1,
+"turns": 12,
+"events": 22,
+"hp": [
+0,
+20
+],
+"digest": "dce7be722fc820da"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 36,
+"winner": 1,
+"turns": 16,
+"events": 31,
+"hp": [
+-1,
+10
+],
+"digest": "d8ee6cdab78d8f42"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 37,
+"winner": 1,
+"turns": 18,
+"events": 34,
+"hp": [
+-2,
+20
+],
+"digest": "a7c3530c1a3a5447"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 38,
+"winner": 1,
+"turns": 30,
+"events": 54,
+"hp": [
+0,
+16
+],
+"digest": "2b76785f1ca66970"
+},
+{
+"a": "aggressive",
+"b": "defensive",
+"seed": 39,
+"winner": 1,
+"turns": 14,
+"events": 26,
+"hp": [
+-2,
+20
+],
+"digest": "e1c707ce70460100"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 0,
+"winner": 0,
+"turns": 11,
+"events": 26,
+"hp": [
+11,
+0
+],
+"digest": "b15cb01dd67cb5a8"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 1,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+14,
+10
+],
+"digest": "c59666b55c3ed4c3"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 2,
+"winner": 0,
+"turns": 19,
+"events": 42,
+"hp": [
+13,
+0
+],
+"digest": "00b2fda2d47e39d1"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 3,
+"winner": 1,
+"turns": 20,
+"events": 44,
+"hp": [
+-5,
+13
+],
+"digest": "cc3864a39fadbcd2"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 4,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+13,
+17
+],
+"digest": "1a20f4c3ce598706"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 5,
+"winner": 1,
+"turns": 26,
+"events": 56,
+"hp": [
+-3,
+8
+],
+"digest": "36d409d9a6cbcdfc"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 6,
+"winner": 0,
+"turns": 9,
+"events": 17,
+"hp": [
+3,
+-1
+],
+"digest": "c1916dd37538eab2"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 7,
+"winner": 0,
+"turns": 29,
+"events": 62,
+"hp": [
+17,
+-2
+],
+"digest": "63312cc5d658d1a9"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 8,
+"winner": 1,
+"turns": 16,
+"events": 34,
+"hp": [
+-2,
+2
+],
+"digest": "437e3ebb25165b24"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 9,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+14,
+20
+],
+"digest": "5f398557ce111282"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 10,
+"winner": 0,
+"turns": 23,
+"events": 50,
+"hp": [
+5,
+-2
+],
+"digest": "301cb7ecc13abf75"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 11,
+"winner": 1,
+"turns": 32,
+"events": 68,
+"hp": [
+-1,
+8
+],
+"digest": "7541ac6dcb0f2ea6"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 12,
+"winner": 1,
+"turns": 14,
+"events": 28,
+"hp": [
+-2,
+1
+],
+"digest": "41376091cf913516"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 13,
+"winner": 1,
+"turns": 32,
+"events": 68,
+"hp": [
+-2,
+6
+],
+"digest": "d2dc034c0daaceb0"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 14,
+"winner": 1,
+"turns": 24,
+"events": 52,
+"hp": [
+-2,
+12
+],
+"digest": "3d2882c191066a5e"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 15,
+"winner": 0,
+"turns": 23,
+"events": 50,
+"hp": [
+9,
+0
+],
+"digest": "7da0f704c05a9c63"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 16,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+9,
+20
+],
+"digest": "7f50fd94637ac28d"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 17,
+"winner": 0,
+"turns": 9,
+"events": 15,
+"hp": [
+3,
+0
+],
+"digest": "2e6629df91add2fc"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 18,
+"winner": 1,
+"turns": 22,
+"events": 48,
+"hp": [
+-2,
+7
+],
+"digest": "8d1b5ad6c7300bae"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 19,
+"winner": 1,
+"turns": 22,
+"events": 48,
+"hp": [
+0,
+8
+],
+"digest": "994c0ef9f67bf941"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 20,
+"winner": 1,
+"turns": 40,
+"events": 84,
+"hp": [
+-4,
+9
+],
+"digest": "adefa501f2910524"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 21,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+20,
+16
+],
+"digest": "4945f9920dc95b63"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 22,
+"winner": 1,
+"turns": 16,
+"events": 34,
+"hp": [
+-1,
+4
+],
+"digest": "5fec6b493886f196"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 23,
+"winner": 0,
+"turns": 27,
+"events": 58,
+"hp": [
+1,
+0
+],
+"digest": "063eaef569eab870"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 24,
+"winner": null,
+"turns": 40,
+"events": 85,
+"hp": [
+10,
+9
+],
+"digest": "a42cec268b714747"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 25,
+"winner": 1,
+"turns": 14,
+"events": 31,
+"hp": [
+-1,
+10
+],
+"digest": "00de21a650b0002e"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 26,
+"winner": 0,
+"turns": 39,
+"events": 82,
+"hp": [
+10,
+0
+],
+"digest": "92a7aa86ff43685d"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 27,
+"winner": 0,
+"turns": 9,
+"events": 19,
+"hp": [
+4,
+-1
+],
+"digest": "521d929b8c974019"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 28,
+"winner": 1,
+"turns": 12,
+"events": 27,
+"hp": [
+-2,
+5
+],
+"digest": "ad7b3cd26b40639f"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 29,
+"winner": 1,
+"turns": 28,
+"events": 60,
+"hp": [
+-2,
+2
+],
+"digest": "d348b2f9c6a3c22b"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 30,
+"winner": 1,
+"turns": 12,
+"events": 27,
+"hp": [
+0,
+2
+],
+"digest": "7e5453f68f14130b"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 31,
+"winner": null,
+"turns": 40,
+"events": 79,
+"hp": [
+20,
+20
+],
+"digest": "3d81bbd6d7952dcc"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 32,
+"winner": 1,
+"turns": 18,
+"events": 39,
+"hp": [
+0,
+5
+],
+"digest": "0025e8fac020ea98"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 33,
+"winner": 1,
+"turns": 28,
+"events": 60,
+"hp": [
+-2,
+11
+],
+"digest": "acafaadcfd82a1b7"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 34,
+"winner": 1,
+"turns": 34,
+"events": 72,
+"hp": [
+0,
+12
+],
+"digest": "b01ae1da4a06ee82"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 35,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+11,
+20
+],
+"digest": "83c69fda38cb64e2"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 36,
+"winner": 0,
+"turns": 9,
+"events": 17,
+"hp": [
+6,
+-1
+],
+"digest": "00424e7c9b3bad5f"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 37,
+"winner": 1,
+"turns": 32,
+"events": 68,
+"hp": [
+-2,
+19
+],
+"digest": "1141187190fe6f97"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 38,
+"winner": null,
+"turns": 40,
+"events": 84,
+"hp": [
+13,
+7
+],
+"digest": "05dfaf33869ac91a"
+},
+{
+"a": "greedy",
+"b": "greedy",
+"seed": 39,
+"winner": 1,
+"turns": 34,
+"events": 72,
+"hp": [
+-1,
+13
+],
+"digest": "3b8b15ef87f46050"
+}
+]

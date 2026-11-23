@@ -17,6 +17,10 @@ class Card:
     heal: int = 0
     shield: int = 0
     weight: int = 1   # how likely this card is to be drawn
+    # Extra mechanics. All default to 0, which gives exactly the original five-card game.
+    draw: int = 0     # draw this many cards when played
+    poison: int = 0   # add this many poison counters to the opponent
+    combo: int = 0    # extra damage if you already played another card this turn
 
 
 @dataclass(frozen=True)
@@ -29,6 +33,12 @@ class Rules:
     max_hand: int = 6
     draw_per_turn: int = 1
     second_player_extra_cards: int = 0
+    # Deck mode. 0 keeps the original behaviour (endless random draws). A positive
+    # number gives each player a finite shuffled deck of that size, drawn without
+    # replacement; a failed draw from an empty deck costs fatigue damage that grows
+    # by `fatigue_damage` each time.
+    deck_size: int = 0
+    fatigue_damage: int = 1
 
 
 def load_config(path: Path = CONFIG_PATH) -> tuple[dict[str, Card], Rules]:

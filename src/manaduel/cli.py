@@ -65,6 +65,32 @@ def _effects(args, config, factories) -> None:
     print(format_effects(estimate_effects(games)))
 
 
+def _tune(args, config, factories) -> None:
+    import numpy as np
+
+    from manaduel.analysis import balance_search as bs
+
+    print(f"Tuning with bots {args.bots}: {args.n} games per bot per configuration, steps {args.schedule}, "
+          f"seed {args.seed}, up to {args.max_moves} moves\n", flush=True)
+    result = bs.search(config, tuple(args.bots), args.n, args.seed, tuple(args.schedule), args.max_moves,
+                       workers=args.workers, log=lambda text: print(text, flush=True))
+    print("\n" + bs.format_moves(result))
+
+    print(f"\nVerification on NEW deals (seed {args.verify_seed}, {args.verify_n} games), before vs after:")
+    for bot in args.verify_bots:
+        for label, cfg in (("before", config), ("after ", result.config)):
+            games = collect(cfg, _pick(factories, bot), args.verify_n, args.verify_seed)
+            report = estimate_effects(games)
+            flagged = ", ".join(f"{e.name} {e.effect:+.1%}" for e in report.flagged()) or "none"
+            print(f"  [{label}] {bot:<10} draws {np.mean(games.score0 == 0.5):5.1%}  "
+                  f"first player {report.seat0_baseline:5.1%}  flagged: {flagged}")
+            if label == "after ":
+                print(format_effects(report))
+    if args.out:
+        config_to_yaml(result.config, args.out)
+        print(f"\nSaved the tuned config to {args.out}")
+
+
 def _realdata(args, config, factories) -> None:
     import time
 
@@ -258,6 +284,18 @@ def main(argv=None) -> None:
     va.add_argument("--workers", type=int, default=None, help="parallel processes (default: most cores)")
     va.add_argument("--csv", help="also write the trials to this CSV file")
 
+    tn = sub.add_parser("tune", help="coarse-to-fine balance search over many card and rule settings")
+    tn.add_argument("--bots", nargs="+", default=["greedy", "defensive"], help="bots the objective averages over")
+    tn.add_argument("--n", type=int, default=8000, help="mirror games per bot per configuration")
+    tn.add_argument("--seed", type=int, default=0)
+    tn.add_argument("--schedule", nargs="+", type=int, default=[4, 2, 1], help="step sizes, coarse to fine")
+    tn.add_argument("--max-moves", type=int, default=25)
+    tn.add_argument("--workers", type=int, default=None)
+    tn.add_argument("--verify-bots", nargs="+", default=["greedy", "defensive"])
+    tn.add_argument("--verify-n", type=int, default=20000)
+    tn.add_argument("--verify-seed", type=int, default=99991)
+    tn.add_argument("--out", help="write the tuned config to this YAML file")
+
     rd = sub.add_parser("realdata", help="card power from a real 17Lands game-data file")
     rd.add_argument("file", help="game_data_public.<SET>.PremierDraft.csv.gz")
     rd.add_argument("--groups", type=int, default=200, help="draft groups for the jackknife")
@@ -294,7 +332,8 @@ def main(argv=None) -> None:
     factories = _factories(getattr(args, "ppo", None))
     handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
                 "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view,
-                "multiseed": _multiseed, "figures": _figures, "realdata": _realdata}
+                "multiseed": _multiseed, "figures": _figures, "realdata": _realdata,
+                "tune": _tune}
     handlers[args.command](args, config, factories)
 
 

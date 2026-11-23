@@ -1,0 +1,44 @@
+# The original five cards plus three that use the extra mechanics.
+#   draw   = draw that many cards when played
+#   poison = adds poison counters to the opponent: at the start of their turn they lose that
+#            much HP (shield does not help) and the counters drop by 1
+#   combo  = extra damage if you already played another card this turn
+# Endless random draws, like the original game. See cards_decks.yaml for finite decks.
+
+rules:
+  max_hp: 20
+  max_mana: 5
+  max_turns: 40
+  max_shield: 6
+  start_hand: 3
+  max_hand: 6
+  draw_per_turn: 1
+  second_player_extra_cards: 0
+
+cards:
+  strike:
+    cost: 1
+    damage: 3
+  fireball:
+    cost: 3
+    damage: 7
+  heal:
+    cost: 2
+    heal: 4
+  shield:
+    cost: 1
+    shield: 3
+  drain:
+    cost: 3
+    damage: 3
+    heal: 3
+  insight:
+    cost: 2
+    draw: 2
+  venom:
+    cost: 2
+    poison: 3
+  flurry:
+    cost: 1
+    damage: 2
+    combo: 3

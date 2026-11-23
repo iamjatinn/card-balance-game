@@ -38,11 +38,14 @@ class MatchResult:
         return wilson_interval(self.points_a, self.games)
 
 
-def play_match(config, name_a, factory_a, name_b, factory_b, n_games, seed=0) -> MatchResult:
+def play_match(config, name_a, factory_a, name_b, factory_b, n_games, seed=0, decks=None) -> MatchResult:
     """Play n_games between two bots, swapping who moves first every game.
 
     factory_x(seed) must build a fresh bot. Fresh bots per game mean the games
     are independent and each one is reproducible from its seed.
+
+    decks (deck mode only): (deck for bot A, deck for bot B); each bot keeps its
+    deck when the seats swap.
     """
     wins_a = wins_b = draws = first_wins = turns_total = 0
     for g in range(n_games):
@@ -53,7 +56,10 @@ def play_match(config, name_a, factory_a, name_b, factory_b, n_games, seed=0) ->
         # Games come in pairs that share one card-draw seed (seats swapped),
         # which cancels some of the luck of the draw between the two bots.
         game_seed = seed + 1_000_003 * (g // 2 + 1)
-        result = play_game(config, agents, seed=game_seed)
+        seat_decks = None
+        if decks is not None:
+            seat_decks = decks if a_moves_first else (decks[1], decks[0])
+        result = play_game(config, agents, seed=game_seed, decks=seat_decks)
         turns_total += result.turns
 
         if result.winner is None:

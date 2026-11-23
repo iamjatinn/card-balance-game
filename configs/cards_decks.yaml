@@ -1,0 +1,44 @@
+# The extended card set in DECK MODE: each player brings a finite deck of 20 cards, drawn without
+# replacement. A failed draw from an empty deck costs fatigue damage (1, then 2, then 3 ...).
+# Decks are chosen by the players (see manaduel.engine.decks); the default is the same balanced
+# deck for both.
+
+rules:
+  max_hp: 20
+  max_mana: 5
+  max_turns: 40
+  max_shield: 6
+  start_hand: 3
+  max_hand: 6
+  draw_per_turn: 1
+  second_player_extra_cards: 0
+  deck_size: 20
+  fatigue_damage: 1
+
+cards:
+  strike:
+    cost: 1
+    damage: 3
+  fireball:
+    cost: 3
+    damage: 7
+  heal:
+    cost: 2
+    heal: 4
+  shield:
+    cost: 1
+    shield: 3
+  drain:
+    cost: 3
+    damage: 3
+    heal: 3
+  insight:
+    cost: 2
+    draw: 2
+  venom:
+    cost: 2
+    poison: 3
+  flurry:
+    cost: 1
+    damage: 2
+    combo: 3

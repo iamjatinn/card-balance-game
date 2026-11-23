@@ -15,10 +15,12 @@ class GameResult:
     # type). The deal is random and independent of how anyone plays, which is
     # what lets the balance tool measure card power without bias.
     start_hands: list[list[int]] = field(default_factory=list)
+    # In deck mode: the deck each player brought (copies of each card type).
+    decks: list[list[int]] = field(default_factory=list)
 
 
 def _event(before: GameState, action: int, after: GameState, config: GameConfig) -> dict:
-    return {
+    event = {
         "turn": before.turn,
         "player": before.current,
         "action": config.action_name(action),
@@ -27,13 +29,25 @@ def _event(before: GameState, action: int, after: GameState, config: GameConfig)
         "mana": [p.mana for p in after.players],
         "hand": [list(p.hand) for p in after.players],
     }
+    # Extra keys appear only when the game uses those mechanics, so the original
+    # game's replays are unchanged.
+    if config.uses_poison:
+        event["poison"] = [p.poison for p in after.players]
+    if config.uses_decks:
+        event["deck_left"] = [sum(p.deck) for p in after.players]
+    return event
 
 
-def play_game(config: GameConfig, agents, seed: int = 0, state: GameState | None = None) -> GameResult:
+def play_game(config: GameConfig, agents, seed: int = 0, state: GameState | None = None,
+              decks=None) -> GameResult:
     """agents is a pair (agent for player 0, agent for player 1).
-    `seed` decides the card draws. `state` lets a test start from a chosen position."""
-    state = new_game(config, seed) if state is None else state
+    `seed` decides the card draws. `state` lets a test start from a chosen position.
+    `decks` (deck mode only) is a pair of decks, one per seat."""
+    state = new_game(config, seed, decks) if state is None else state
     start_hands = [list(p.hand) for p in state.players]
+    # The deck a player brought = what is left of it after the starting hand was dealt + that hand.
+    start_decks = ([[d + h for d, h in zip(p.deck, p.hand)] for p in state.players]
+                   if config.uses_decks else [])
     events: list[dict] = []
     max_turns = config.rules.max_turns
 
@@ -53,4 +67,5 @@ def play_game(config: GameConfig, agents, seed: int = 0, state: GameState | None
         turns=min(state.turn, max_turns),
         events=events,
         start_hands=start_hands,
+        decks=start_decks,
     )
