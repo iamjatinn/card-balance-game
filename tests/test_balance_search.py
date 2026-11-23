@@ -47,6 +47,29 @@ def test_levers_cover_every_effect_cost_and_a_few_rules():
     assert "cards.strike.heal" not in keys     # strike has no heal to tune
 
 
+def test_levers_cover_the_new_card_stats():
+    from pathlib import Path
+
+    from manaduel.analysis.autobalance import main_stat
+
+    ext = load_game_config(Path(__file__).resolve().parents[1] / "configs" / "cards_extended.yaml")
+    keys = {lever.key: lever for lever in levers_for(ext)}
+    assert {"cards.venom.poison", "cards.flurry.combo", "cards.flurry.damage", "cards.insight.draw",
+            "cards.venom.cost"} <= set(keys)
+    assert keys["cards.venom.poison"].coarse_ok and keys["cards.flurry.combo"].coarse_ok
+    assert not keys["cards.insight.draw"].coarse_ok          # a card count moves by 1
+    assert keys["cards.insight.draw"].low == 1 and keys["cards.insight.draw"].high == 3
+    # every extended card has a headline stat, so validate / autobalance v1 work on it too
+    assert {c.name: main_stat(c) for c in ext.cards} == {
+        "strike": "damage", "fireball": "damage", "heal": "heal", "shield": "shield", "drain": "damage",
+        "insight": "draw", "venom": "poison", "flurry": "damage"}
+    # an extended move can be applied
+    from manaduel.analysis.sweep import apply_overrides
+
+    changed = apply_overrides(ext, {"cards.venom.poison": 2, "cards.insight.draw": 1})
+    assert next(c for c in changed.cards if c.name == "venom").poison == 2
+
+
 def test_candidates_respect_bounds_and_step_sizes():
     levers = levers_for(CFG)
     moves = candidates(CFG, levers, step=2)

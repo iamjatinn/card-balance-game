@@ -23,7 +23,7 @@ from manaduel.analysis.sweep import apply_overrides
 
 import numpy as np
 
-MAIN_STATS = ("damage", "heal", "shield")
+MAIN_STATS = ("damage", "heal", "shield", "poison", "draw")
 
 
 @dataclass(frozen=True)
