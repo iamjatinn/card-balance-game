@@ -1,6 +1,8 @@
 pyyaml
 pytest
 numpy
+pandas
+matplotlib
 gymnasium
 pygame
 pillow
