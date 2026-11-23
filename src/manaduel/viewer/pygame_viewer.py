@@ -47,6 +47,7 @@ class Snap:
     shield: tuple
     mana: tuple
     hand: tuple
+    poison: tuple = (0, 0)
 
 
 @dataclass(frozen=True)
@@ -64,6 +65,7 @@ class Beat:
 class View:
     names: tuple
     card_names: tuple
+    cards: tuple
     max_hp: int
     max_mana: int
     max_shield: int
@@ -73,8 +75,8 @@ class View:
     turns: int
 
 
-def _snap(hp, shield, mana, hand) -> Snap:
-    return Snap(tuple(hp), tuple(shield), tuple(mana), tuple(tuple(h) for h in hand))
+def _snap(hp, shield, mana, hand, poison=(0, 0)) -> Snap:
+    return Snap(tuple(hp), tuple(shield), tuple(mana), tuple(tuple(h) for h in hand), tuple(poison))
 
 
 def build_view(replay: dict) -> View:
@@ -90,15 +92,17 @@ def build_view(replay: dict) -> View:
     start = snap
     beats = []
     for e in replay["events"]:
-        after = _snap(e["hp"], e["shield"], e["mana"], e["hand"])
+        after = _snap(e["hp"], e["shield"], e["mana"], e["hand"], e.get("poison", (0, 0)))
         if e["action"] != "end_turn":
             card = by_name[e["action"]]
-            absorbed = min(snap.shield[1 - e["player"]], card["damage"])
+            # the opponent's shield only ever shrinks on our turn, by absorbing damage
+            absorbed = max(0, snap.shield[1 - e["player"]] - after.shield[1 - e["player"]])
             beats.append(Beat(len(beats), e["turn"], e["player"], card, snap, after, absorbed))
         snap = after  # end_turn events carry the refilled mana and drawn card into the next beat
     return View(
         names=tuple(replay["agents"]),
         card_names=tuple(c["name"] for c in cards),
+        cards=tuple(cards),
         max_hp=rules["max_hp"],
         max_mana=rules["max_mana"],
         max_shield=rules.get("max_shield", 6),
@@ -126,7 +130,19 @@ def _lerp(a, b, t):
     return a + (b - a) * t
 
 
+POISON_COL = (140, 176, 44)
+DRAW_COL = (48, 170, 190)
+COMBO_COL = (232, 140, 48)
+
+
 def card_color(card: dict):
+    """A card's colour, from what it does (replays from before the extra mechanics lack those keys)."""
+    if card.get("poison"):
+        return POISON_COL
+    if card.get("draw"):
+        return DRAW_COL
+    if card.get("combo"):
+        return COMBO_COL
     if card["damage"] and card["heal"]:
         return DRAIN_COL
     if card["damage"]:
@@ -189,7 +205,7 @@ def _draw_robot(surface, cx, ground, color, flash, shield_alpha, facing):
         surface.blit(ring, ring.get_rect(center=(cx, body.centery - 24)))
 
 
-def _draw_bars(surface, fonts, view, side, cx, hp, shield, mana):
+def _draw_bars(surface, fonts, view, side, cx, hp, shield, mana, poison=0.0):
     bar = pygame.Rect(0, 0, 270, 22)
     bar.center = (cx, 118)
     pygame.draw.rect(surface, HP_BACK, bar, border_radius=8)
@@ -209,26 +225,29 @@ def _draw_bars(surface, fonts, view, side, cx, hp, shield, mana):
         pts = [(cxm, cym - 9), (cxm + 8, cym), (cxm, cym + 9), (cxm - 8, cym)]
         on = i < round(mana)
         pygame.draw.polygon(surface, MANA_COL if on else (60, 56, 40), pts)
+    if round(poison) > 0:
+        _text(surface, fonts.small, f"poison {round(poison)}", POISON_COL, left=bar.left, top=bar.bottom + 56)
     _text(surface, fonts.mid, view.names[side], PLAYER_COL[side], center=(cx, 80))
 
 
 def _draw_hand(surface, fonts, view, side, hand, highlight=None):
-    chip_w, chip_h, gap = 84, 56, 6
     n = len(view.card_names)
-    total = n * chip_w + (n - 1) * gap
+    cols = min(n, 5)                      # more than five card types wrap onto a second row
+    rows = -(-n // cols)
+    chip_w, chip_h, gap = 84, (56 if rows == 1 else 48), 6
+    total = cols * chip_w + (cols - 1) * gap
     x0 = 24 if side == 0 else W - 24 - total
-    y0 = 420
+    y0 = 420 if rows == 1 else 408
     for i, name in enumerate(view.card_names):
         count = hand[i] if i < len(hand) else 0
-        r = pygame.Rect(x0 + i * (chip_w + gap), y0, chip_w, chip_h)
-        base = {"strike": ATTACK_COL, "fireball": ATTACK_COL, "drain": DRAIN_COL,
-                "heal": HEAL_COL, "shield": SHIELD_COL}.get(name, (150, 150, 170))
+        r = pygame.Rect(x0 + (i % cols) * (chip_w + gap), y0 + (i // cols) * (chip_h + gap), chip_w, chip_h)
+        base = card_color(view.cards[i])
         col = base if count > 0 else (46, 50, 70)
         pygame.draw.rect(surface, col, r, border_radius=8)
         border = (255, 255, 255) if highlight == name else (90, 96, 120)
         pygame.draw.rect(surface, border, r, width=3 if highlight == name else 1, border_radius=8)
-        _text(surface, fonts.tiny, name, TEXT if count else DIM, center=(r.centerx, r.top + 16))
-        _text(surface, fonts.mid, f"x{count}", TEXT if count else DIM, center=(r.centerx, r.top + 38))
+        _text(surface, fonts.tiny, name, TEXT if count else DIM, center=(r.centerx, r.top + 14))
+        _text(surface, fonts.mid, f"x{count}", TEXT if count else DIM, center=(r.centerx, r.bottom - 16))
 
 
 def _float_text(surface, fonts, text, color, x, y, c):
@@ -257,6 +276,7 @@ def draw(surface, fonts, view: View, idx: int, p: float, help_text: str = "") ->
     hp = [_lerp(before.hp[i], after.hp[i], k) for i in range(2)]
     shield = [_lerp(before.shield[i], after.shield[i], k) for i in range(2)]
     mana = [_lerp(before.mana[i], after.mana[i], k) for i in range(2)]
+    poison = [_lerp(before.poison[i], after.poison[i], k) for i in range(2)]
     hand = before.hand if (beat is None or k < 0.5) else after.hand
     if beat is not None and beat.index == 0 and p < 0.35:
         hand = view.start.hand
@@ -266,6 +286,7 @@ def draw(surface, fonts, view: View, idx: int, p: float, help_text: str = "") ->
     damage = beat.card["damage"] if beat else 0
     gains_shield = bool(beat and beat.card["shield"] > 0)
     heals = bool(beat and beat.card["heal"] > 0)
+    poisons = int(beat.card.get("poison", 0)) if beat else 0
 
     for side in (0, 1):
         facing = 1 if side == 0 else -1
@@ -283,7 +304,7 @@ def draw(surface, fonts, view: View, idx: int, p: float, help_text: str = "") ->
         if beat and side == actor and gains_shield:
             shield_vis = max(shield_vis, math.sin(math.pi * b))
         _draw_robot(surface, int(x + lunge + shake), ground, PLAYER_COL[side], flash, shield_vis, facing)
-        _draw_bars(surface, fonts, view, side, x, hp[side], shield[side], mana[side])
+        _draw_bars(surface, fonts, view, side, x, hp[side], shield[side], mana[side], poison[side])
         _draw_hand(surface, fonts, view, side, hand[side], highlight=beat.card["name"] if beat and side == actor else None)
 
     if beat:
@@ -295,7 +316,7 @@ def draw(surface, fonts, view: View, idx: int, p: float, help_text: str = "") ->
         pygame.draw.rect(surface, (255, 255, 255), banner, width=2, border_radius=12)
         _text(surface, fonts.mid, f"{beat.card['name'].upper()}  ({beat.card['cost']} mana)", (15, 15, 25), center=banner.center)
         # projectile
-        if damage and 0 < b < 1:
+        if (damage or poisons) and 0 < b < 1:
             sx = xs[actor] + (60 if actor == 0 else -60)
             tx = xs[target]
             px = _lerp(sx, tx, _ease(b))
@@ -312,20 +333,31 @@ def draw(surface, fonts, view: View, idx: int, p: float, help_text: str = "") ->
         # floating numbers (shown during the settle phase)
         if c > 0 or b >= 1:
             cc = c
+            # Labels sit in the open space beside each robot (toward the middle), never on its head.
+            lx = [xs[0] + 135, xs[1] - 135]
             if damage:
                 dealt = round(before.hp[target] - after.hp[target])
                 if dealt > 0:
-                    _float_text(surface, fonts, f"-{dealt}", ATTACK_COL, xs[target], 250, cc)
+                    _float_text(surface, fonts, f"-{dealt}", ATTACK_COL, lx[target], 300, cc)
                 if beat.absorbed:
-                    _float_text(surface, fonts, f"{beat.absorbed} blocked", SHIELD_COL, xs[target], 210, cc)
+                    _float_text(surface, fonts, f"{beat.absorbed} blocked", SHIELD_COL, lx[target], 262, cc)
             if beat.card["heal"]:
                 gained = round(after.hp[actor] - before.hp[actor])
                 if gained > 0:
-                    _float_text(surface, fonts, f"+{gained}", HEAL_COL, xs[actor], 250, cc)
+                    _float_text(surface, fonts, f"+{gained}", HEAL_COL, lx[actor], 300, cc)
             if beat.card["shield"]:
                 gained = round(after.shield[actor] - before.shield[actor])
                 if gained > 0:
-                    _float_text(surface, fonts, f"+{gained} shield", SHIELD_COL, xs[actor], 250, cc)
+                    _float_text(surface, fonts, f"+{gained} shield", SHIELD_COL, lx[actor], 300, cc)
+            if poisons:
+                _float_text(surface, fonts, f"poison +{poisons}", POISON_COL, lx[target], 300, cc)
+            outer = [xs[0] - 135, xs[1] + 135]       # the far side, away from the move log in the middle
+            if beat.card.get("draw"):
+                _float_text(surface, fonts, f"+{beat.card['draw']} cards", DRAW_COL, outer[actor], 300, cc)
+            if beat.card.get("combo") and damage:
+                bonus = round(before.hp[target] - after.hp[target]) + beat.absorbed - damage
+                if bonus > 0:
+                    _float_text(surface, fonts, f"COMBO +{bonus}", COMBO_COL, outer[actor], 300, cc)
 
     # header and move log
     turn = beat.turn if beat else view.turns

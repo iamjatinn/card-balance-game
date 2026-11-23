@@ -65,6 +65,76 @@ def _effects(args, config, factories) -> None:
     print(format_effects(estimate_effects(games)))
 
 
+def _metagame(args, config, factories) -> None:
+    import random
+
+    import numpy as np
+
+    from manaduel.analysis import metagame as mg
+    from manaduel.analysis import plots
+    from manaduel.engine.decks import archetype_decks, describe, random_deck
+
+    if not config.uses_decks:
+        raise SystemExit("this game has no decks; use --config configs/cards_decks.yaml")
+    rng = random.Random(args.seed)
+    decks = dict(archetype_decks(config))
+    for k in range(args.random_decks):
+        decks[f"random{k + 1}"] = random_deck(config, rng)
+    print(f"Metagame with bot '{args.bot}': {len(decks)} decks, {args.n} games per pairing, seed {args.seed}\n", flush=True)
+    for name, deck in decks.items():
+        print(f"  {name:<10} {describe(config, deck)}")
+    print()
+
+    matrix = mg.deck_matrix(config, decks, args.bot, args.n, args.seed, args.workers)
+    print(mg.format_matrix(matrix))
+    print(mg.format_health(matrix, config), flush=True)
+
+    if args.effects_n:
+        from manaduel.analysis.card_effects import collect, estimate_effects
+
+        factory = _pick(factories, args.bot)
+        print(f"\nCard power, two natural experiments ({args.effects_n} games each, bot '{args.bot}'):")
+        by_deck = estimate_effects(mg.collect_decks(config, factory, args.effects_n, args.seed))
+        by_hand = estimate_effects(collect(config, factory, args.effects_n, args.seed))
+        hand = {e.name: e for e in by_hand.effects}
+        print(f"  {'card':<10}{'one more copy in the DECK':>28}{'one more copy in the OPENING HAND':>38}")
+        for e in sorted(by_deck.effects, key=lambda e: -e.effect):
+            h = hand[e.name]
+            print(f"  {e.name:<10}{e.effect:>+10.1%} [{e.ci_low:>+6.1%},{e.ci_high:>+6.1%}]{'*' if e.flagged else ' '}"
+                  f"{h.effect:>+14.1%} [{h.ci_low:>+6.1%},{h.ci_high:>+6.1%}]{'*' if h.flagged else ' '}")
+        corr = float(np.corrcoef([e.effect for e in by_deck.effects], [hand[e.name].effect for e in by_deck.effects])[0, 1])
+        print(f"  (* = flagged)  correlation between the two: {corr:.2f}")
+
+    if args.build:
+        names = [c.name for c in config.cards]
+        field = list(decks.values())
+        start = decks["balanced"]
+        print(f"\nDeck builder: hill climbing from 'balanced' against all {len(field)} decks "
+              f"({args.build_n} games per matchup)", flush=True)
+        steps = mg.build_deck(config, start, field, args.bot, args.build_n, args.seed + 1,
+                              workers=args.workers, log=lambda text: print("  " + text, flush=True))
+        built = steps[-1].deck
+        print(f"  built deck: {describe(config, built)}")
+        check_seed = args.seed + 777
+        before, after = mg.field_scores(config, args.bot, [start, built], field, args.n, check_seed,
+                                        workers=args.workers or 1)
+        print(f"  check on NEW games (seed {check_seed}, {args.n} per matchup): "
+              f"balanced {before:.1%} -> built {after:.1%} average win rate against the field")
+        with_built = dict(decks)
+        with_built["built"] = built
+        bigger = mg.deck_matrix(config, with_built, args.bot, args.n, check_seed, args.workers)
+        print("\nWith the built deck added to the metagame:")
+        print(mg.format_matrix(bigger))
+        print(mg.format_health(bigger, config))
+
+    if args.out:
+        out = Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        mg.write_matrix_csv(matrix, out.with_suffix(".csv"))
+        plots.plot_deck_matrix(matrix, out.with_suffix(".png"))
+        print(f"\nSaved {out.with_suffix('.csv')} and {out.with_suffix('.png')}")
+
+
 def _tune(args, config, factories) -> None:
     import numpy as np
 
@@ -129,6 +199,19 @@ def _realdata(args, config, factories) -> None:
         print(f"\nSaved {out.with_suffix('.csv')} and {out.with_suffix('.png')}")
 
 
+def _headtohead(args, config, factories) -> None:
+    import glob
+
+    from manaduel.analysis.multiseed import format_head_to_head, head_to_head
+
+    a, b = sorted(glob.glob(args.a)), sorted(glob.glob(args.b))
+    if not a or not b:
+        raise SystemExit(f"no models match {args.a!r} or {args.b!r}")
+    print(f"{len(a)} models vs {len(b)} models, {args.n} games per pairing, seed {args.seed}\n", flush=True)
+    scores = head_to_head(a, b, args.n, args.seed, args.workers, config_path=args.config)
+    print(format_head_to_head(args.label_a, args.label_b, scores, args.n))
+
+
 def _multiseed(args, config, factories) -> None:
     import glob
 
@@ -138,7 +221,7 @@ def _multiseed(args, config, factories) -> None:
     from manaduel.analysis.multiseed import final_eval, format_final, write_final_csv
 
     print(f"Evaluating {len(paths)} models, {args.n} games per bot, seed {args.seed}\n", flush=True)
-    scores = final_eval(paths, args.n, args.seed, args.workers)
+    scores = final_eval(paths, args.n, args.seed, args.workers, config_path=args.config)
     bots = list(BOT_FACTORIES)
     print(format_final(paths, bots, scores, args.n))
     if args.csv:
@@ -284,6 +367,17 @@ def main(argv=None) -> None:
     va.add_argument("--workers", type=int, default=None, help="parallel processes (default: most cores)")
     va.add_argument("--csv", help="also write the trials to this CSV file")
 
+    mgp = sub.add_parser("metagame", help="deck-vs-deck analysis in deck mode (use --config configs/cards_decks.yaml)")
+    mgp.add_argument("--bot", default="greedy")
+    mgp.add_argument("--n", type=int, default=2000, help="games per deck pairing")
+    mgp.add_argument("--seed", type=int, default=0)
+    mgp.add_argument("--random-decks", type=int, default=4, help="extra random decks in the field")
+    mgp.add_argument("--effects-n", type=int, default=20000, help="games for the card-power comparison (0 to skip)")
+    mgp.add_argument("--build", action="store_true", help="also run the deck builder")
+    mgp.add_argument("--build-n", type=int, default=300, help="games per matchup while building")
+    mgp.add_argument("--workers", type=int, default=None)
+    mgp.add_argument("--out", help="write OUT.csv and OUT.png")
+
     tn = sub.add_parser("tune", help="coarse-to-fine balance search over many card and rule settings")
     tn.add_argument("--bots", nargs="+", default=["greedy", "defensive"], help="bots the objective averages over")
     tn.add_argument("--n", type=int, default=8000, help="mirror games per bot per configuration")
@@ -303,6 +397,15 @@ def main(argv=None) -> None:
     rd.add_argument("--min-effect", type=float, default=0.01, help="smallest effect worth flagging")
     rd.add_argument("--seed", type=int, default=0)
     rd.add_argument("--out", help="write OUT.csv and OUT.png")
+
+    hh = sub.add_parser("headtohead", help="every model in group A plays every model in group B")
+    hh.add_argument("a", help='glob for group A models, e.g. "checkpoints/selfplay_seed*.zip"')
+    hh.add_argument("b", help="glob for group B models")
+    hh.add_argument("--label-a", default="A")
+    hh.add_argument("--label-b", default="B")
+    hh.add_argument("--n", type=int, default=400, help="games per pairing of two models")
+    hh.add_argument("--seed", type=int, default=4242)
+    hh.add_argument("--workers", type=int, default=None)
 
     ms = sub.add_parser("multiseed", help="evaluate several trained models on the same fresh games")
     ms.add_argument("checkpoints", help='glob such as "checkpoints/ppo_seed*.zip"')
@@ -332,8 +435,8 @@ def main(argv=None) -> None:
     factories = _factories(getattr(args, "ppo", None))
     handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
                 "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view,
-                "multiseed": _multiseed, "figures": _figures, "realdata": _realdata,
-                "tune": _tune}
+                "multiseed": _multiseed, "headtohead": _headtohead, "figures": _figures, "realdata": _realdata,
+                "tune": _tune, "metagame": _metagame}
     handlers[args.command](args, config, factories)
 
 

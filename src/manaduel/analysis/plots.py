@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 BOT_COLORS = {"random": "#8c8c96", "aggressive": "#e0604a", "defensive": "#4a90e0", "greedy": "#e0a030"}
-CARD_COLORS = {"strike": "#e0604a", "fireball": "#b03030", "heal": "#4ab070", "shield": "#4a90e0", "drain": "#a050c0"}
+CARD_COLORS = {"strike": "#e0604a", "fireball": "#b03030", "heal": "#4ab070", "shield": "#4a90e0", "drain": "#a050c0",
+               "insight": "#30a0b0", "venom": "#7a9a20", "flurry": "#e08030"}
 
 
 def plot_learning_curves(agg, path, title=None) -> None:
@@ -86,6 +87,32 @@ def plot_real_vs_naive(report, path, label_top: int = 6, title=None) -> None:
     ax.set_title(title or "Real games: unbiased effect vs the usual games-in-hand statistic")
     ax.grid(alpha=0.25)
     ax.legend(fontsize=8, loc="upper left")
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+
+
+def plot_deck_matrix(matrix, path, title=None) -> None:
+    """Heat map of how often each row deck beats each column deck."""
+    n = len(matrix.names)
+    fig, ax = plt.subplots(figsize=(1.0 + 0.85 * n, 0.8 + 0.8 * n), dpi=130)
+    im = ax.imshow(matrix.win * 100, cmap="RdBu", vmin=25, vmax=75)
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                ax.text(j, i, "-", ha="center", va="center", color="gray")
+            else:
+                clear = matrix.low[i, j] > 0.5 or matrix.high[i, j] < 0.5   # interval excludes 50%
+                ax.text(j, i, f"{matrix.win[i, j] * 100:.0f}", ha="center", va="center", fontsize=8,
+                        fontweight="bold" if clear else "normal", color="black")
+    ax.set_xticks(range(n))
+    ax.set_yticks(range(n))
+    ax.set_xticklabels(matrix.names, rotation=45, ha="right", fontsize=8)
+    ax.set_yticklabels(matrix.names, fontsize=8)
+    ax.set_xlabel("opponent's deck")
+    ax.set_ylabel("deck (win rate in %)")
+    ax.set_title(title or f"Deck vs deck, {matrix.games} games per pairing (bold = clearly not 50%)", fontsize=9)
+    fig.colorbar(im, ax=ax, fraction=0.04, pad=0.03)
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)

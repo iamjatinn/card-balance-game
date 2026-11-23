@@ -24,9 +24,12 @@ def infer_memory(model, config) -> bool:
 class PPOAgent(Agent):
     name = "ppo"
 
-    def __init__(self, model, memory: bool | None = None):
+    def __init__(self, model, memory: bool | None = None, deterministic: bool = True):
         self.model = model
         self._memory = memory   # None = work it out from the model on first use
+        # True: always play the most likely move. False: sample from the model's probabilities
+        # (used for frozen self-play opponents, so they are not all identical and predictable).
+        self.deterministic = deterministic
 
     def act(self, state, legal_actions, config):
         if self._memory is None:
@@ -34,7 +37,7 @@ class PPOAgent(Agent):
         obs = observation(state, state.current, config, memory=self._memory)
         mask = np.zeros(config.n_actions, dtype=bool)
         mask[legal_actions] = True  # the network may only pick legal moves
-        action, _ = self.model.predict(obs, action_masks=mask, deterministic=True)
+        action, _ = self.model.predict(obs, action_masks=mask, deterministic=self.deterministic)
         return int(action)
 
 

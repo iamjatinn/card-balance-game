@@ -68,16 +68,15 @@ def aggregate(curves: Curves) -> Aggregate:
 
 def _eval_checkpoint(job) -> list[float]:
     """Worker: win rate of one saved model against every bot, on a fixed set of fresh games."""
-    path, n_games, seed = job
+    path, n_games, seed, config_path = job
     import torch
 
     torch.set_num_threads(1)
     from manaduel.agents.registry import BOT_FACTORIES
     from manaduel.agents.rl_agent import PPOAgent, load_ppo_model
-    from manaduel.engine.rules import load_game_config
     from manaduel.sim.tournament import play_match
 
-    config = load_game_config()
+    config = _load_config(config_path)
     model = load_ppo_model(path)
     agent = lambda s: PPOAgent(model)  # noqa: E731
     return [
@@ -86,18 +85,69 @@ def _eval_checkpoint(job) -> list[float]:
     ]
 
 
-def final_eval(paths: list[str], n_games: int = 500, seed: int = 777,
-               workers: int | None = None) -> np.ndarray:
-    """Evaluate each checkpoint; returns an array of shape (checkpoints, bots)."""
-    jobs = [(p, n_games, seed) for p in paths]
+def _load_config(config_path):
+    from pathlib import Path
+
+    from manaduel.engine.rules import load_game_config
+
+    return load_game_config(Path(config_path)) if config_path else load_game_config()
+
+
+def _run(func, jobs, workers):
     if workers is None:
         workers = max(1, min(len(jobs), (os.cpu_count() or 2) - 2))
     if workers <= 1:
-        rows = [_eval_checkpoint(j) for j in jobs]
-    else:
-        with ProcessPoolExecutor(max_workers=workers) as pool:
-            rows = list(pool.map(_eval_checkpoint, jobs, chunksize=1))
-    return np.array(rows)
+        return [func(j) for j in jobs]
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        return list(pool.map(func, jobs, chunksize=1))
+
+
+def final_eval(paths: list[str], n_games: int = 500, seed: int = 777,
+               workers: int | None = None, config_path=None) -> np.ndarray:
+    """Evaluate each checkpoint; returns an array of shape (checkpoints, bots)."""
+    return np.array(_run(_eval_checkpoint, [(p, n_games, seed, config_path) for p in paths], workers))
+
+
+def _duel_job(job) -> float:
+    """Worker: how often model A beats model B (draw = half), seats swapped every game."""
+    path_a, path_b, n_games, seed, config_path = job
+    import torch
+
+    torch.set_num_threads(1)
+    from manaduel.agents.rl_agent import PPOAgent, load_ppo_model
+    from manaduel.sim.tournament import play_match
+
+    config = _load_config(config_path)
+    model_a, model_b = load_ppo_model(path_a), load_ppo_model(path_b)
+    return play_match(config, "a", lambda s: PPOAgent(model_a), "b", lambda s: PPOAgent(model_b),
+                      n_games, seed=seed).score_a
+
+
+def head_to_head(paths_a: list[str], paths_b: list[str], n_games: int = 400, seed: int = 4242,
+                 workers: int | None = None, config_path=None) -> np.ndarray:
+    """Every model in group A plays every model in group B. Returns shape (len(A), len(B)):
+    how often the A model wins. Averaging over many model pairs is what makes a
+    group-against-group claim more than one lucky pairing."""
+    jobs = [(a, b, n_games, seed, config_path) for a in paths_a for b in paths_b]
+    return np.array(_run(_duel_job, jobs, workers)).reshape(len(paths_a), len(paths_b))
+
+
+def format_head_to_head(label_a: str, label_b: str, scores: np.ndarray, n_games: int) -> str:
+    """Summary with the spread across model pairs (not across games)."""
+    flat = scores.ravel()
+    per_a = scores.mean(axis=1)
+    lines = [
+        f"{label_a} (rows) against {label_b} (columns): {n_games} games per pairing of two models",
+        "win rate of the row model:",
+    ]
+    for i, row in enumerate(scores):
+        lines.append("  model A%d " % i + "".join(f"{v:>8.1%}" for v in row) + f"   mean {row.mean():.1%}")
+    ddof = 1 if len(flat) > 1 else 0
+    lines.append(f"mean over all {len(flat)} model pairs: {flat.mean():.1%} "
+                 f"(std across pairs {flat.std(ddof=ddof):.1%}; best A model {per_a.max():.1%}, worst {per_a.min():.1%})")
+    wins = int(np.sum(flat > 0.5))
+    lines.append(f"{label_a} wins the pairing in {wins} of {len(flat)} model pairs")
+    return "\n".join(lines)
 
 
 def format_final(paths: list[str], bots, scores: np.ndarray, n_games: int) -> str:
