@@ -1,0 +1,9 @@
+﻿3 models vs 3 models, 400 games per pairing, seed 4242
+
+with memory (rows) against bots-only (columns): 400 games per pairing of two models
+win rate of the row model:
+  model A0    49.5%   48.5%   49.5%   mean 49.2%
+  model A1    47.0%   47.0%   48.8%   mean 47.6%
+  model A2    47.6%   47.0%   48.5%   mean 47.7%
+mean over all 9 model pairs: 48.2% (std across pairs 1.0%; best A model 49.2%, worst 47.6%)
+with memory wins the pairing in 0 of 9 model pairs

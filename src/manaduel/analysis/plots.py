@@ -36,6 +36,41 @@ def plot_learning_curves(agg, path, title=None) -> None:
     plt.close(fig)
 
 
+GROUP_COLORS = ["#4a90e0", "#e0604a", "#4ab070", "#a050c0", "#e0a030"]
+
+
+def plot_group_comparison(groups: dict, path, title=None) -> None:
+    """Training curves for several variants side by side. `groups` maps a label to an
+    `Aggregate` (see multiseed.aggregate). Top-left is the average over the four bots;
+    the other panels are the win rate against each bot. Lines are means over runs, bands are
+    +/- one standard deviation across runs."""
+    first = next(iter(groups.values()))
+    bots = list(first.bots)
+    fig, axes = plt.subplots(2, 3, figsize=(12, 6.2), dpi=130, sharex=True)
+    panels = [("average of the four bots", None)] + [(f"vs {b}", i) for i, b in enumerate(bots)]
+    for ax, (label, bot_index) in zip(axes.ravel(), panels):
+        for color, (name, agg) in zip(GROUP_COLORS, groups.items()):
+            x = agg.steps / 1000
+            mean = agg.overall_mean if bot_index is None else agg.mean[:, bot_index]
+            std = agg.overall_std if bot_index is None else agg.std[:, bot_index]
+            ax.plot(x, mean * 100, color=color, lw=2, label=f"{name} ({agg.runs} runs)")
+            ax.fill_between(x, (mean - std) * 100, (mean + std) * 100, color=color, alpha=0.15, lw=0)
+        ax.set_title(label, fontsize=10)
+        ax.axhline(50, color="gray", ls=":", lw=1)
+        ax.grid(alpha=0.25)
+    for ax in axes[1]:
+        ax.set_xlabel("training steps (thousands)")
+    for ax in axes[:, 0]:
+        ax.set_ylabel("win rate (%)")
+    axes.ravel()[-1].axis("off")                      # six slots, five panels
+    handles, labels = axes.ravel()[0].get_legend_handles_labels()
+    axes.ravel()[-1].legend(handles, labels, loc="center", fontsize=10, frameon=False)
+    fig.suptitle(title or "Training variants compared (mean +/- 1 std across runs)", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+
+
 def plot_card_effects(report, path, title=None) -> None:
     """Each card's power relative to the reference card, with 95% confidence intervals."""
     effects = sorted(report.effects, key=lambda e: e.effect)

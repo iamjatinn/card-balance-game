@@ -1,0 +1,4 @@
+model,random,aggressive,defensive,greedy,mean
+ext_self_seed0.zip,0.9500,0.9780,0.9640,0.6460,0.8845
+ext_self_seed1.zip,0.9600,0.9840,0.9700,0.6450,0.8897
+ext_self_seed2.zip,0.9560,0.9790,0.9620,0.6590,0.8890

@@ -1,0 +1,10 @@
+Mirror matches of 'ppo': 8000 games, seed 0
+
+Card power from 8000 mirror games (win-probability change per extra starting copy, vs the median card)
+      card   effect       95% interval       z  verdict
+     drain    +5.3% [  +4.0%,   +6.7%]     7.8  TOO STRONG
+    strike    +5.3% [  +3.9%,   +6.6%]     7.7  TOO STRONG
+  fireball    +0.0% (the reference card)
+      heal    -1.9% [  -3.2%,   -0.5%]    -2.7  ok
+    shield    -7.6% [  -8.9%,   -6.3%]   -11.3  TOO WEAK
+First player's win rate with identical hands: 48.0% (+/- 1.0%)

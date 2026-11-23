@@ -236,6 +236,15 @@ def _figures(args, config, factories) -> None:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     made = []
+    if args.compare:
+        groups = {}
+        for spec in args.compare:
+            label, _, pattern = spec.partition("=")
+            if not pattern:
+                raise SystemExit(f"--compare needs LABEL=GLOB, got {spec!r}")
+            groups[label] = aggregate(load_curves(pattern))
+        plots.plot_group_comparison(groups, out / args.compare_name)
+        made.append(args.compare_name)
     if args.curves:
         plots.plot_learning_curves(aggregate(load_curves(args.curves)), out / "learning_curves.png")
         made.append("learning_curves.png")
@@ -417,6 +426,9 @@ def main(argv=None) -> None:
     fg = sub.add_parser("figures", help="draw README figures from saved data")
     fg.add_argument("--out", default="docs", help="folder for the PNG files")
     fg.add_argument("--curves", help='learning-curve CSVs, e.g. "runs/progress_seed*.csv"')
+    fg.add_argument("--compare", nargs="+", metavar="LABEL=GLOB",
+                    help='compare training variants, e.g. bots="runs/ext_bots_seed*.csv" memory="runs/ext_mem_seed*.csv"')
+    fg.add_argument("--compare-name", default="variants.png", help="file name for the comparison figure")
     fg.add_argument("--validation", help="validation CSV from the validate command")
     fg.add_argument("--effects-bot", help="measure card power with this bot and plot it")
     fg.add_argument("--effects-n", type=int, default=20000)

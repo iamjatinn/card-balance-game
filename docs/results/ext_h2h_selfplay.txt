@@ -1,0 +1,9 @@
+﻿3 models vs 3 models, 400 games per pairing, seed 4242
+
+self-play (rows) against bots-only (columns): 400 games per pairing of two models
+win rate of the row model:
+  model A0    49.8%   48.0%   53.0%   mean 50.3%
+  model A1    50.0%   51.0%   52.2%   mean 51.1%
+  model A2    53.0%   50.2%   53.2%   mean 52.2%
+mean over all 9 model pairs: 51.2% (std across pairs 1.8%; best A model 52.2%, worst 50.3%)
+self-play wins the pairing in 6 of 9 model pairs

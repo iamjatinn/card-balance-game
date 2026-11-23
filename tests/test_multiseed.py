@@ -94,6 +94,22 @@ def test_figures_are_written(run_files, tmp_path):
         assert (tmp_path / name).stat().st_size > 8_000
 
 
+def test_group_comparison_figure_and_cli_flag(tmp_path, run_files):
+    from manaduel.analysis.plots import plot_group_comparison
+
+    write_run(tmp_path / "other_seed0.csv", [(50000, [0.7, 0.8, 0.5, 0.5]), (100000, [0.8, 0.9, 0.6, 0.6])])
+    groups = {"one": aggregate(load_curves(run_files)),
+              "two": aggregate(load_curves(str(tmp_path / "other_seed*.csv")))}
+    plot_group_comparison(groups, tmp_path / "cmp.png")
+    assert (tmp_path / "cmp.png").stat().st_size > 10_000
+
+    from manaduel.cli import main
+
+    main(["figures", "--out", str(tmp_path / "docs"), "--compare", f"one={run_files}",
+          f"two={tmp_path / 'other_seed*.csv'}", "--compare-name", "x.png"])
+    assert (tmp_path / "docs" / "x.png").stat().st_size > 10_000
+
+
 def test_final_eval_runs_on_a_saved_model(tmp_path):
     pytest.importorskip("sb3_contrib")
     from sb3_contrib import MaskablePPO

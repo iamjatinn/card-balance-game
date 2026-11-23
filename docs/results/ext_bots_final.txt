@@ -1,0 +1,13 @@
+﻿Evaluating 3 models, 500 games per bot, seed 777
+
+Final evaluation of 3 trained model(s): 500 games per bot, same fresh games for every model
+model                       random  aggressive   defensive      greedy      mean
+ext_bots_seed0.zip           95.0%       98.0%       96.3%       64.4%     88.4%
+ext_bots_seed1.zip           94.0%       97.9%       96.5%       65.4%     88.4%
+ext_bots_seed2.zip           94.6%       98.3%       96.8%       63.0%     88.2%
+mean                         94.5%       98.1%       96.5%       64.3%     88.4%
+std across models             0.5%        0.2%        0.3%        1.2%      0.2%
+worst model                  94.0%       97.9%       96.3%       63.0%     88.2%
+best model                   95.0%       98.3%       96.8%       65.4%     88.4%
+
+Saved docs/results/ext_bots_final.csv

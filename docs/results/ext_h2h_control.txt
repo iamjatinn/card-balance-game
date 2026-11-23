@@ -1,0 +1,9 @@
+﻿3 models vs 3 models, 400 games per pairing, seed 4242
+
+bots-only (rows) against bots-only (control: same recipe, other seeds) (columns): 400 games per pairing of two models
+win rate of the row model:
+  model A0    50.0%   49.0%   52.8%   mean 50.6%
+  model A1    51.0%   50.0%   51.2%   mean 50.7%
+  model A2    47.2%   48.8%   50.0%   mean 48.7%
+mean over all 9 model pairs: 50.0% (std across pairs 1.6%; best A model 50.7%, worst 48.7%)
+bots-only wins the pairing in 3 of 9 model pairs
