@@ -1,0 +1,4 @@
+﻿cards: 266 | cards with |effect| < 1 point: 69
+median naive gap among those near-zero cards: +2.3 points
+median naive gap over all cards: +1.9 points; median effect over all cards: -0.0 points
+raw win rate on the play 0.587 vs on the draw 0.537: difference +5.0 points (n=896877)

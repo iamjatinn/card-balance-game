@@ -40,8 +40,9 @@ class DefensiveAgent(Agent):
         me = state.players[state.current]
         cards = [a for a in legal_actions if a != config.end_turn]
 
-        # 1. Heal if we are missing a lot of HP.
-        if config.rules.max_hp - me.hp >= 8:
+        # 1. Heal if we are missing a lot of HP (40% of max; 8 of 20 in the default game,
+        #    expressed as a fraction so a rescaled game plays the same way).
+        if config.rules.max_hp - me.hp >= 0.4 * config.rules.max_hp:
             heals = [
                 a for a in cards
                 if config.cards[a].heal > 0 and config.cards[a].damage == 0

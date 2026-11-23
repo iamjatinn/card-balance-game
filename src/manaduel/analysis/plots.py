@@ -63,6 +63,34 @@ def plot_card_effects(report, path, title=None) -> None:
     plt.close(fig)
 
 
+def plot_real_vs_naive(report, path, label_top: int = 6, title=None) -> None:
+    """Natural-experiment effect (x) against the biased 'games in hand' statistic (y), one dot per card."""
+    eff = report.effects
+    x = np.array([e.effect for e in eff]) * 100
+    y = np.array([e.naive_gih for e in eff]) * 100
+    xerr = np.array([[e.effect - e.ci_low for e in eff], [e.ci_high - e.effect for e in eff]]) * 100
+    fig, ax = plt.subplots(figsize=(7.2, 5.4), dpi=130)
+    ax.errorbar(x, y, xerr=xerr, fmt="none", ecolor="#bbbbbb", lw=0.7, zorder=1)
+    flagged = np.array([e.flagged for e in eff])
+    ax.scatter(x[~flagged], y[~flagged], s=14, color="#4a90e0", alpha=0.75, label="not flagged", zorder=2)
+    ax.scatter(x[flagged], y[flagged], s=22, color="#e0604a", label="flagged", zorder=3)
+    ax.axhline(0, color="black", lw=0.8)
+    ax.axvline(0, color="black", lw=0.8)
+    lo, hi = min(x.min(), y.min()), max(x.max(), y.max())
+    ax.plot([lo, hi], [lo, hi], ls=":", color="gray", lw=1)
+    gap = np.abs(y - x)
+    for i in np.argsort(-gap)[:label_top]:
+        ax.annotate(eff[i].name[:22], (x[i], y[i]), fontsize=6.5, xytext=(3, 3), textcoords="offset points")
+    ax.set_xlabel("natural-experiment effect: win probability per extra opening-hand copy (points)")
+    ax.set_ylabel("naive 'games in hand' gap: seen vs never seen (points)")
+    ax.set_title(title or "Real games: unbiased effect vs the usual games-in-hand statistic")
+    ax.grid(alpha=0.25)
+    ax.legend(fontsize=8, loc="upper left")
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+
+
 def load_validation_csv(path) -> list[dict]:
     with open(path, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))

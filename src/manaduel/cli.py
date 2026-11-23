@@ -65,6 +65,44 @@ def _effects(args, config, factories) -> None:
     print(format_effects(estimate_effects(games)))
 
 
+def _realdata(args, config, factories) -> None:
+    import time
+
+    from manaduel.analysis import plots, real_data
+
+    path = Path(args.file)
+    if not path.exists():
+        raise SystemExit(f"no such file: {path}")
+    started = time.time()
+
+    def progress(read, used):
+        print(f"  read {read:>9,} games ({used:,} usable)  {time.time() - started:5.0f}s", flush=True)
+
+    print(f"Reading {path.name} (this streams the file in chunks)\n", flush=True)
+    sums = real_data.accumulate(path, groups=args.groups, max_rows=args.max_rows, progress=progress)
+    report = real_data.estimate(sums, min_effect=args.min_effect)
+    print()
+    print(real_data.format_report(report))
+
+    split = real_data.split_half(sums, seed=args.seed)
+    comp = real_data.comparison(report)
+    print("\nDoes the estimate replicate? Two random halves of the drafts:")
+    print(f"  correlation of the two halves' effects: {split['correlation']:.2f}")
+    print(f"  same sign in both halves (all cards): {split['sign_agreement_all']:.0%}")
+    print(f"  cards clearly non-zero in BOTH halves: {split['cards_clear_in_both_halves']}, "
+          f"of which same sign: {split['sign_agreement_clear']:.0%}")
+    print("\nAgainst the usual biased 'games in hand' statistic:")
+    print(f"  correlation {comp['pearson']:.2f} (rank {comp['spearman']:.2f}); its spread is "
+          f"{comp['naive_scale']:.1f}x larger; same sign for {comp['sign_agreement']:.0%} of cards")
+
+    if args.out:
+        out = Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        real_data.write_csv(report, out.with_suffix(".csv"))
+        plots.plot_real_vs_naive(report, out.with_suffix(".png"))
+        print(f"\nSaved {out.with_suffix('.csv')} and {out.with_suffix('.png')}")
+
+
 def _multiseed(args, config, factories) -> None:
     import glob
 
@@ -220,6 +258,14 @@ def main(argv=None) -> None:
     va.add_argument("--workers", type=int, default=None, help="parallel processes (default: most cores)")
     va.add_argument("--csv", help="also write the trials to this CSV file")
 
+    rd = sub.add_parser("realdata", help="card power from a real 17Lands game-data file")
+    rd.add_argument("file", help="game_data_public.<SET>.PremierDraft.csv.gz")
+    rd.add_argument("--groups", type=int, default=200, help="draft groups for the jackknife")
+    rd.add_argument("--max-rows", type=int, default=None, help="only read this many rows (for a quick test)")
+    rd.add_argument("--min-effect", type=float, default=0.01, help="smallest effect worth flagging")
+    rd.add_argument("--seed", type=int, default=0)
+    rd.add_argument("--out", help="write OUT.csv and OUT.png")
+
     ms = sub.add_parser("multiseed", help="evaluate several trained models on the same fresh games")
     ms.add_argument("checkpoints", help='glob such as "checkpoints/ppo_seed*.zip"')
     ms.add_argument("--n", type=int, default=500, help="games per bot per model")
@@ -248,7 +294,7 @@ def main(argv=None) -> None:
     factories = _factories(getattr(args, "ppo", None))
     handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
                 "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view,
-                "multiseed": _multiseed, "figures": _figures}
+                "multiseed": _multiseed, "figures": _figures, "realdata": _realdata}
     handlers[args.command](args, config, factories)
 
 

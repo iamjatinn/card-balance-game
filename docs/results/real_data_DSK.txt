@@ -1,0 +1,48 @@
+﻿Reading game_data_public.DSK.PremierDraft.csv.gz (this streams the file in chunks)
+
+
+Card power from real games: 896,877 games with no mulligan (of 1,011,949 read), 266 cards, 200 draft groups
+effect = win-probability change per extra copy in the opening hand, versus a basic land;
+naive  = 'games in hand' style statistic (seen vs never seen), which is biased by game length
+on the play: +5.1% win probability
+
+card                                effect        95% interval   naive  deck games  flag
+--- top 12 ---
+Zimone, All-Questioning             +11.8%  [+10.7%, +12.9%]  +10.1%      46,122  STRONG
+Overlord of the Mistmoors           +11.3%  [ +9.8%, +12.9%]  +15.8%      23,748  STRONG
+Unstoppable Slasher                  +9.9%  [ +8.7%, +11.0%]   +9.9%      42,035  STRONG
+Optimistic Scavenger                 +9.7%  [ +9.0%, +10.5%]   +6.7%      93,812  STRONG
+Unholy Annex // Ritual Chamber       +9.5%  [ +8.3%, +10.6%]  +14.0%      44,973  STRONG
+Entity Tracker                       +8.9%  [ +7.8%, +10.0%]   +8.7%      47,038  STRONG
+Silent Hallcreeper                   +8.9%  [ +7.7%, +10.0%]   +7.6%      46,672  STRONG
+Overlord of the Balemurk             +8.3%  [ +6.7%,  +9.9%]   +9.8%      21,119  STRONG
+Oblivious Bookworm                   +8.0%  [ +7.2%,  +8.8%]   +7.8%      89,755  STRONG
+Dollmaker's Shop // Porcelain Gal    +7.9%  [ +6.2%,  +9.5%]   +9.1%      22,330  STRONG
+Roaring Furnace // Steaming Sauna    +7.6%  [ +6.4%,  +8.8%]  +10.2%      42,327  STRONG
+The Swarmweaver                      +7.6%  [ +6.4%,  +8.8%]  +12.9%      47,180  STRONG
+--- bottom 12 ---
+Bedhead Beastie                      -4.0%  [ -4.9%,  -3.1%]   -2.1%      65,435  WEAK
+Cackling Slasher                     -4.1%  [ -6.3%,  -1.9%]   -2.8%      13,675  
+Attack-in-the-Box                    -4.1%  [ -6.0%,  -2.3%]   -3.3%      17,242  WEAK
+Demonic Counsel                      -4.2%  [ -8.6%,  +0.3%]   +1.4%       3,332  
+Peer Past the Veil                   -4.4%  [ -6.3%,  -2.5%]   -1.0%      21,893  WEAK
+Anthropede                           -4.6%  [ -5.9%,  -3.4%]   -3.2%      41,494  WEAK
+Unwanted Remake                      -4.8%  [ -6.9%,  -2.8%]   -4.2%      16,800  WEAK
+Enter the Enigma                     -5.6%  [ -7.2%,  -3.9%]   -1.2%      19,873  WEAK
+Meathook Massacre II                 -6.3%  [ -9.2%,  -3.5%]   -0.0%       8,122  WEAK
+Malevolent Chandelier                -6.7%  [ -7.9%,  -5.5%]   -3.3%      45,770  WEAK
+Doomsday Excruciator                 -8.0%  [-11.1%,  -4.9%]   -7.2%       5,917  WEAK
+Dazzling Theater // Prop Room       -11.1%  [-14.4%,  -7.8%]  -10.1%       4,842  WEAK
+
+flagged: 73 strong, 51 weak of 266 cards (Bonferroni, and at least 1 point)
+
+Does the estimate replicate? Two random halves of the drafts:
+  correlation of the two halves' effects: 0.92
+  same sign in both halves (all cards): 89%
+  cards clearly non-zero in BOTH halves: 129, of which same sign: 100%
+
+Against the usual biased 'games in hand' statistic:
+  correlation 0.77 (rank 0.66); its spread is 1.0x larger; same sign for 68% of cards
+
+Saved docs\results\real_data_DSK.csv and docs\results\real_data_DSK.png
+
