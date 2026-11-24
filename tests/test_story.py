@@ -237,3 +237,84 @@ def test_render_story_end_to_end_and_the_command(tiny_run, tmp_path, monkeypatch
 
     ba = Image.open(folder / "before_after.gif")
     assert ba.size[0] > ba.size[1] * 2 and ba.n_frames > 10        # two games side by side
+
+
+# ---- the match-by-match pictures (story/matches.py) ---------------------------------------
+
+from manaduel.story import matches as mt  # noqa: E402
+
+
+def test_grid_holds_every_match_and_is_roughly_the_wanted_shape():
+    for n in (1, 7, 600, 28_692):
+        rows, cols = mt.grid_shape(n)
+        assert rows * cols >= n and (rows - 1) * cols < n          # fits all, no wasted row
+    rows, cols = mt.grid_shape(28_692, 1.0)
+    assert abs(rows - cols) <= 2
+
+
+def test_colours_follow_the_result_win_loss_draw():
+    c = mt.result_colors([1.0, 0.0, 0.5, 1.0])
+    assert [tuple(x) for x in c] == [mt.WIN_RGB, mt.LOSS_RGB, mt.DRAW_RGB, mt.WIN_RGB]
+
+
+def test_first_and_last_segment_win_rates_use_real_results(tmp_path):
+    story = load_story(make_fake_recording(tmp_path / "rec"))
+    first, last = mt.segment_win_rates(story, k=100)
+    assert first == pytest.approx(story.result[:100].mean())
+    assert last == pytest.approx(story.result[-100:].mean())
+    assert last > first                                           # the fake run improves
+
+
+def test_frame_counts_are_increasing_start_early_and_end_at_the_last_match():
+    counts = mt.match_frame_counts(28_692, 100)
+    assert counts[0] >= 1 and counts[-1] == 28_692
+    assert counts == sorted(set(counts))                          # strictly increasing, no repeats
+    assert counts[10] < 28_692 * 0.02                             # the early failing phase gets many frames
+
+
+def test_the_matches_animation_runs_from_match_one_to_the_last(tmp_path):
+    from PIL import Image
+
+    story = load_story(make_fake_recording(tmp_path / "rec"))
+    n = mt.animate_matches(story, tmp_path / "m.gif", frames=10, hold=3, size=(600, 338))
+    gif = Image.open(tmp_path / "m.gif")
+    assert gif.size == (600, 338) and gif.n_frames >= 8 and n >= gif.n_frames
+
+
+def test_stage_checkpoints_start_untrained_end_at_the_end_and_never_repeat(tmp_path):
+    story = load_story(make_fake_recording(tmp_path / "rec", checkpoints=9))
+    picks = mt.pick_stage_checkpoints(story, 5)
+    assert picks[0] == 0 and picks[-1] == len(story.ck["matches"]) - 1
+    assert picks == sorted(set(picks))
+
+
+def test_journey_game_needs_a_loss_first_then_a_win_and_prefers_the_honest_stage(monkeypatch):
+    """With scripted outcomes: seed 2 never loses first, seed 3 loses then wins at stage 1 (expected), seed 4
+    wins only at the last stage, seed 5 is a win-then-loss path."""
+    import types
+
+    import manaduel.agents.rl_agent as rl
+    import manaduel.engine.game as game
+
+    table = {1: [1, 1, 1], 2: [0, 1, 1], 3: [0, 0, 1], 5: [0, 1, 0]}     # winner==0 means the agent won
+    plan = {s: [types.SimpleNamespace(winner=0 if w else 1, turns=9) for w in ws] for s, ws in table.items()}
+    calls = {}
+
+    class FakeAgent:
+        def __init__(self, m):
+            self.m = m
+
+    def fake_play(config, agents, seed):
+        stage = calls.setdefault(seed, [])
+        idx = len(stage) % len(plan[seed])        # stage number, cycling per pick
+        stage.append(1)
+        return plan[seed][idx]
+
+    monkeypatch.setattr(rl, "PPOAgent", FakeAgent)
+    monkeypatch.setattr(game, "play_game", fake_play)
+    seed, results = mt.pick_journey_game(None, ["a", "b", "c"], "greedy", seeds=[1, 2, 3, 5], expected_first_win=1)
+    assert seed == 2 and [r.winner == 0 for r in results] == [False, True, True]
+    seed, _ = mt.pick_journey_game(None, ["a", "b", "c"], "greedy", seeds=[1, 3, 5], expected_first_win=2)
+    assert seed == 3
+    with pytest.raises(RuntimeError):
+        mt.pick_journey_game(None, ["a", "b", "c"], "greedy", seeds=[1, 5])

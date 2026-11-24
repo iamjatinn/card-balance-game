@@ -26,6 +26,8 @@ A turn-based card duel, built from scratch, together with the tools to study it:
 
 What changed in its play, measured on the test games: it plays Shield 2.8x as often (0.9 to 2.4 times per game) and finishes games with an average HP lead of +8.8 instead of -1.5; game length did not change (about 21 turns). Most of the learning happens in the first ~3,000 matches, then the curve flattens at about 80%.
 
+- **Every match as a coloured square** (green won, red lost, grey drew), from match 1 to match 28,692, with a zoom on the first 600 matches where it mostly fails: [`matches_animation.gif`](docs/story/matches_animation.gif). First 500 matches: 46% won; last 500: 85%.
+- **One game, five stages**: the same game against the same bot at match 0 (lost) and after about 1k, 5k, 12k and 29k matches (won), with the real win rate of each stage printed on the picture: [`journey.gif`](docs/story/journey.gif). The game is a chosen example (picked so that it agrees with the real win rates); the numbers on the picture are the honest summary.
 - Animated curve and win rates growing from match 1: [`learning_animation.gif`](docs/story/learning_animation.gif)
 - The untrained and the trained agent in the same game against the same bot: [`before_after.gif`](docs/story/before_after.gif) (a chosen example; the table above is the honest summary)
 - Which cards it plays before and after: [`behaviour.png`](docs/story/behaviour.png); a draft caption using the real numbers: [`linkedin_post.md`](docs/story/linkedin_post.md)

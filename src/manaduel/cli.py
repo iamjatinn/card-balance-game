@@ -277,12 +277,16 @@ def _story(args, config, factories) -> None:
     made = render_story(out, config, args.bot, args.footer, log=lambda text: print(text, flush=True))
     print("\nWrote:")
     for key, value in made.items():
-        if key != "example":
+        if key not in ("example", "journey_info"):
             print(f"  {value}")
     ex = made["example"]
     print(f"\nBefore/after example: game seed {ex['seed']} vs the {ex['bot']} bot "
           f"(untrained agent lost in {ex['before_turns']} turns, trained agent won in {ex['after_turns']}). "
           "It is a chosen example; the card shows the honest averages.")
+    journey = made["journey_info"]
+    shown = ", ".join(f"match {s['matches']:,}: {s['this_game']}" for s in journey["stages"])
+    print(f"Journey game (seed {journey['seed']}, vs the {journey['bot']} bot): {shown}. "
+          "Also a chosen example; each stage's real win rate is printed on the picture.")
 
 
 def _play(args, config, factories) -> None:

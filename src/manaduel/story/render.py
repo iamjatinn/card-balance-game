@@ -500,6 +500,15 @@ def render_story(out_dir, config, bot_name: str = "greedy", footer: str = "", lo
     example = build_before_after(config, before, after, bot_name, out / "before_after.gif",
                                  replay_dir=out / "replays", n_matches=story.n_matches)
     made["before_after"] = out / "before_after.gif"
+
+    from manaduel.story.matches import animate_journey, animate_matches
+
+    log("drawing every match as a square, then the journey through training")
+    animate_matches(story, out / "matches_animation.gif")
+    made["matches"] = out / "matches_animation.gif"
+    journey = animate_journey(story, config, out / "models", out / "journey.gif", bot_name)
+    made["journey"] = out / "journey.gif"
+    made["journey_info"] = journey
     (out / "linkedin_post.md").write_text(caption_text(story, example), encoding="utf-8")
     made["post"] = out / "linkedin_post.md"
     made["example"] = example
