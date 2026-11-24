@@ -44,6 +44,7 @@ class ManaDuelEnv(gym.Env):
         self.state = None
         self.learner = 0       # which seat the agent plays this episode (0 moves first)
         self.opponent = None
+        self.opponent_name = ""
 
     # -- helpers ----------------------------------------------------------
 
@@ -79,6 +80,7 @@ class ManaDuelEnv(gym.Env):
         self.learner = int(rng.integers(2))
         names = list(self.opponents)
         name = names[int(rng.integers(len(names)))]
+        self.opponent_name = name
         self.opponent = self.opponents[name](int(rng.integers(2**31 - 1)))
         seats = None
         if self.decks:
@@ -100,8 +102,12 @@ class ManaDuelEnv(gym.Env):
 
         terminated = is_terminal(self.state, self.config.rules.max_turns)
         reward = 0.0
+        info = {}
         if terminated:
             w = winner(self.state, self.config.rules.max_turns)
             if w is not None:
                 reward = 1.0 if w == self.learner else -1.0
-        return self._obs(), reward, terminated, False, {}
+            # who it played and how long it lasted (the training story reads this per match)
+            info = {"opponent": self.opponent_name, "learner_side": self.learner,
+                    "turns": min(self.state.turn, self.config.rules.max_turns)}
+        return self._obs(), reward, terminated, False, info

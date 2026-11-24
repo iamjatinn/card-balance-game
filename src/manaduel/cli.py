@@ -8,7 +8,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from manaduel.agents.registry import BOT_FACTORIES
+from manaduel.agents.registry import ALL_BOT_FACTORIES, BOT_FACTORIES
 from manaduel.analysis.autobalance import autobalance, config_to_yaml, format_trajectory
 from manaduel.analysis.card_effects import collect, estimate_effects
 from manaduel.analysis.card_effects import format_report as format_effects
@@ -24,7 +24,7 @@ from manaduel.viewer.terminal import render_game
 
 def _factories(ppo_path):
     """The hand-written bots, plus 'ppo' if a trained model file is given."""
-    factories = dict(BOT_FACTORIES)
+    factories = dict(ALL_BOT_FACTORIES)
     if ppo_path:
         from manaduel.agents.rl_agent import PPOAgent, load_ppo_model
 
@@ -51,7 +51,8 @@ def _watch(args, config, factories) -> None:
 
 
 def _tournament(args, config, factories) -> None:
-    names = args.agents or list(factories)
+    # the default tournament is the four core bots (plus ppo if given), as in v0.1
+    names = args.agents or [n for n in factories if n in BOT_FACTORIES or n == "ppo"]
     chosen = {n: _pick(factories, n) for n in names}
     print(f"Round robin: {len(names)} bots, {args.n} games per pairing, seed {args.seed}\n")
     results = round_robin(config, chosen, args.n, args.seed)
@@ -258,6 +259,59 @@ def _figures(args, config, factories) -> None:
     print("Wrote " + ", ".join(str(out / m) for m in made) if made else "Nothing to draw: give --curves, --validation or --effects-bot")
 
 
+def _story(args, config, factories) -> None:
+    out = Path(args.out)
+    if not args.render_only:
+        from manaduel.story.record import run_story
+
+        config_name = Path(args.config).name if args.config else "cards.yaml"
+        print(f"Recording a training story into {out}: {args.steps:,} steps from scratch, "
+              f"a test every {args.chunk:,} steps ({args.eval_games} games per bot)\n", flush=True)
+        run_story(config, out, args.steps, args.chunk, args.eval_games, args.final_games, args.envs,
+                  args.seed, config_name, log=lambda text: print(text, flush=True))
+    if args.no_render:
+        return
+    from manaduel.story.render import render_story
+
+    print("\nDrawing the pictures from the recording...", flush=True)
+    made = render_story(out, config, args.bot, args.footer, log=lambda text: print(text, flush=True))
+    print("\nWrote:")
+    for key, value in made.items():
+        if key not in ("example", "journey_info"):
+            print(f"  {value}")
+    ex = made["example"]
+    print(f"\nBefore/after example: game seed {ex['seed']} vs the {ex['bot']} bot "
+          f"(untrained agent lost in {ex['before_turns']} turns, trained agent won in {ex['after_turns']}). "
+          "It is a chosen example; the card shows the honest averages.")
+    journey = made["journey_info"]
+    shown = ", ".join(f"match {s['matches']:,}: {s['this_game']}" for s in journey["stages"])
+    print(f"Journey game (seed {journey['seed']}, vs the {journey['bot']} bot): {shown}. "
+          "Also a chosen example; each stage's real win rate is printed on the picture.")
+
+
+def _play(args, config, factories) -> None:
+    import random
+
+    from manaduel import play
+
+    if args.summary:
+        print(play.summarize(args.log))
+        return
+    bot_factory = _pick(factories, args.bot)
+    seed = args.seed if args.seed is not None else random.randrange(10**6)
+    seat = random.Random(seed).randrange(2) if args.seat == "random" else int(args.seat)
+    decks = None
+    if config.uses_decks:
+        from manaduel.engine.decks import archetype_decks
+
+        deck = archetype_decks(config)[args.deck]
+        decks = (deck, deck)
+    result = play.play_human(config, bot_factory(seed), seat, seed, bot_name=args.bot, decks=decks)
+    config_name = Path(args.config).name if args.config else "cards.yaml"
+    replay = play.record(result, config, seat, args.bot, seed, config_name, args.log)
+    print(f"\nSaved the replay to {replay} (watch it with: view {replay}) and logged the game to {args.log}")
+
+
 def _view(args, config, factories) -> None:
     # Imported here so the rest of the project works without pygame installed.
     from manaduel.viewer import pygame_viewer
@@ -433,6 +487,28 @@ def main(argv=None) -> None:
     fg.add_argument("--effects-bot", help="measure card power with this bot and plot it")
     fg.add_argument("--effects-n", type=int, default=20000)
 
+    st = sub.add_parser("story", help="train an agent from scratch while recording it, then draw shareable visuals")
+    st.add_argument("--steps", type=int, default=600_000, help="training steps (about 30,000 matches per 600,000)")
+    st.add_argument("--chunk", type=int, default=25_000, help="steps between checkpoint tests")
+    st.add_argument("--eval-games", type=int, default=100, help="test games per bot at each checkpoint")
+    st.add_argument("--final-games", type=int, default=500, help="test games per bot at the last checkpoint")
+    st.add_argument("--envs", type=int, default=8, help="matches played in parallel while training")
+    st.add_argument("--seed", type=int, default=0)
+    st.add_argument("--out", default="docs/story", help="folder for the recording and the pictures")
+    st.add_argument("--render-only", action="store_true", help="skip training; redraw from an existing recording")
+    st.add_argument("--no-render", action="store_true", help="only record, do not draw the pictures")
+    st.add_argument("--bot", default="greedy", help="opponent in the before/after replay")
+    st.add_argument("--footer", default="", help="text for the bottom of the card, e.g. your project link")
+
+    pl = sub.add_parser("play", help="play a game yourself in the terminal against a bot")
+    pl.add_argument("--bot", default="greedy", help="who you play against")
+    pl.add_argument("--seat", default="random", choices=["0", "1", "random"], help="0 = you move first")
+    pl.add_argument("--seed", type=int, default=None, help="game seed (same seed = same cards)")
+    pl.add_argument("--deck", default="balanced", help="deck mode only: archetype both players use")
+    pl.add_argument("--log", default="runs/human_games.csv")
+    pl.add_argument("--summary", action="store_true", help="show your win rate so far instead of playing")
+    pl.add_argument("--ppo", help="path to a trained model; makes 'ppo' available as an opponent")
+
     vw = sub.add_parser("view", help="watch a saved replay in a window (needs pygame)")
     vw.add_argument("replay", help="a replay JSON from: watch --save")
     vw.add_argument("--speed", type=float, default=1.0)
@@ -446,7 +522,7 @@ def main(argv=None) -> None:
     config = load_game_config(Path(args.config)) if args.config else load_game_config()
     factories = _factories(getattr(args, "ppo", None))
     handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
-                "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view,
+                "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view, "play": _play, "story": _story,
                 "multiseed": _multiseed, "headtohead": _headtohead, "figures": _figures, "realdata": _realdata,
                 "tune": _tune, "metagame": _metagame}
     handlers[args.command](args, config, factories)

@@ -30,12 +30,12 @@ from dataclasses import dataclass, replace
 
 import numpy as np
 
-from manaduel.agents.registry import BOT_FACTORIES
+from manaduel.agents.registry import ALL_BOT_FACTORIES
 from manaduel.analysis.card_effects import collect, estimate_effects
 from manaduel.analysis.sweep import apply_overrides
 from manaduel.engine.rules import GameConfig
 
-STAT_FIELDS = ("damage", "heal", "shield")
+STAT_FIELDS = ("damage", "heal", "shield", "poison", "combo")   # effect sizes the search may move in steps
 
 
 def scale_config(config: GameConfig, factor: int) -> GameConfig:
@@ -73,6 +73,8 @@ def levers_for(config: GameConfig) -> list[Lever]:
             value = getattr(c, stat)
             if value > 0:
                 out.append(Lever(f"cards.{c.name}.{stat}", 1, 3 * value, True))
+        if c.draw > 0:   # a count of cards, so it moves by 1 only
+            out.append(Lever(f"cards.{c.name}.draw", 1, 3, False))
         out.append(Lever(f"cards.{c.name}.cost", 1, config.rules.max_mana, False))
     out.append(Lever("rules.max_shield", 1, 4 * config.rules.max_shield, True))
     out.append(Lever("rules.second_player_extra_cards", -1, 2, False))
@@ -121,7 +123,7 @@ def _evaluate_job(job) -> Eval:
     config, bots, n_games, seed, weights = job
     effects, draws, firsts, flagged = [], [], [], set()
     for bot in bots:
-        games = collect(config, BOT_FACTORIES[bot], n_games, seed)
+        games = collect(config, ALL_BOT_FACTORIES[bot], n_games, seed)
         report = estimate_effects(games)
         effects.append([e.effect for e in report.effects])
         draws.append(float(np.mean(games.score0 == 0.5)))

@@ -71,20 +71,25 @@ class DefensiveAgent(Agent):
         return config.end_turn if best is None else best
 
 
-def _card_value(card, me, opp, rules) -> float:
-    """Rough worth of playing a card right now, in 'points'."""
+def _card_value(card, me, opp, rules, w=None) -> float:
+    """Rough worth of playing a card right now, in 'points'. `w` sets how much the bot
+    cares about each kind of effect (the defaults are the original greedy bot's)."""
+    w = w or DEFAULT_WEIGHTS
     damage = card.damage + (card.combo if me.combo > 0 else 0)  # combo bonus needs an earlier card this turn
     absorbed = min(opp.shield, damage)
     if damage - absorbed >= opp.hp:
         return 1000.0  # lethal: always take it
-    damage_value = (damage - absorbed) + 0.5 * absorbed       # breaking a shield is worth something
-    heal_value = min(card.heal, rules.max_hp - me.hp)         # healing past max HP is wasted
-    shield_value = 0.7 * min(card.shield, rules.max_shield - me.shield)  # shield above the cap is wasted
+    damage_value = w["damage"] * ((damage - absorbed) + 0.5 * absorbed)  # breaking a shield is worth something
+    heal_value = w["heal"] * min(card.heal, rules.max_hp - me.hp)        # healing past max HP is wasted
+    shield_value = w["shield"] * min(card.shield, rules.max_shield - me.shield)  # shield above the cap is wasted
     # Extra mechanics (zero for the original five cards, so their values are unchanged):
     room = rules.max_hand - sum(me.hand)                      # cards drawn into a full hand are burned
-    draw_value = 1.5 * max(0, min(card.draw, room))
-    poison_value = 0.8 * card.poison * (card.poison + 1) / 2  # the total it will deal over the next turns
+    draw_value = w["draw"] * max(0, min(card.draw, room))
+    poison_value = w["poison"] * card.poison * (card.poison + 1) / 2  # the total it will deal over the next turns
     return damage_value + heal_value + shield_value + draw_value + poison_value
+
+
+DEFAULT_WEIGHTS = {"damage": 1.0, "heal": 1.0, "shield": 0.7, "draw": 1.5, "poison": 0.8}
 
 
 class GreedyAgent(Agent):
@@ -92,6 +97,7 @@ class GreedyAgent(Agent):
     nothing affordable is worth anything."""
 
     name = "greedy"
+    weights = DEFAULT_WEIGHTS
 
     def __init__(self, seed=None):
         pass
@@ -104,7 +110,22 @@ class GreedyAgent(Agent):
             if a == config.end_turn:
                 continue
             card = config.cards[a]
-            ratio = _card_value(card, me, opp, config.rules) / card.cost
+            ratio = _card_value(card, me, opp, config.rules, self.weights) / card.cost
             if ratio > best_ratio:
                 best_action, best_ratio = a, ratio
         return best_action
+
+
+class CautiousAgent(GreedyAgent):
+    """Like greedy but it values healing, shields and cards more and damage less. Unlike the
+    defensive bot it uses every kind of card, so it can test cards the defensive bot ignores."""
+
+    name = "cautious"
+    weights = {"damage": 0.8, "heal": 1.3, "shield": 1.0, "draw": 2.0, "poison": 0.7}
+
+
+class BoldAgent(GreedyAgent):
+    """Like greedy but it values damage and poison more and shields and healing less."""
+
+    name = "bold"
+    weights = {"damage": 1.3, "heal": 0.8, "shield": 0.4, "draw": 1.0, "poison": 1.1}

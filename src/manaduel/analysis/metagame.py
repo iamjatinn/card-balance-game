@@ -28,7 +28,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from manaduel.agents.registry import BOT_FACTORIES
+from manaduel.agents.registry import ALL_BOT_FACTORIES as BOT_FACTORIES
 from manaduel.analysis.card_effects import Games
 from manaduel.engine.decks import archetype_decks, random_deck
 from manaduel.engine.game import play_game
