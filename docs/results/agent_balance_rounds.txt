@@ -1,0 +1,16 @@
+round 0: worst flurry +20.5%, rms 7.6%, cards off by 3+ points: ['drain', 'flurry'], first player 56.9%
+   drain (-3.8%): damage 7 -> 8, heal 6 -> 7
+   flurry (+20.5%): damage 4 -> 2, combo 16 -> 10
+round 1: worst flurry +9.4%, rms 4.3%, cards off by 3+ points: ['shield', 'insight', 'flurry'], first player 55.0%
+   shield (-6.0%): shield 14 -> 17
+   insight (+3.1%): cost 2 -> 3
+   flurry (+9.4%): damage 2 -> 1, combo 10 -> 6
+round 2: worst shield -7.5%, rms 3.9%, cards off by 3+ points: ['fireball', 'shield', 'drain'], first player 50.1%
+   fireball (+6.2%): damage 14 -> 11
+   shield (-7.5%): shield 17 -> 22
+   drain (+3.1%): damage 8 -> 7, heal 7 -> 6
+round 3: worst shield -9.3%, rms 3.6%, cards off by 3+ points: ['shield'], first player 47.7%
+   shield (-9.3%): shield 22 -> 30
+round 4: worst shield -10.9%, rms 4.3%, cards off by 3+ points: ['shield', 'drain', 'venom'], first player 50.3%
+
+best round by RMS card power: 3 (rms 3.6%, worst shield -9.3%); config runs\agent_balance\round3\cards.yaml

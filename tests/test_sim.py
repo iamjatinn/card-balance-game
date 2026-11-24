@@ -68,3 +68,16 @@ def test_match_tracks_average_game_length():
     r = play_match(CFG, "greedy", GreedyAgent, "rand", RandomAgent, 40, seed=2)
     assert r.turns_total > 0
     assert 1 <= r.avg_turns <= CFG.rules.max_turns
+
+
+def test_deck_mode_matches_are_spread_over_every_deck_pairing():
+    from pathlib import Path
+
+    from manaduel.agents.registry import BOT_FACTORIES
+    from manaduel.engine.rules import load_game_config
+    from manaduel.sim.tournament import play_match_over_decks
+
+    cfg = load_game_config(Path("configs/cards_decks.yaml"))
+    r = play_match_over_decks(cfg, "g", BOT_FACTORIES["greedy"], "r", BOT_FACTORIES["random"], 32, seed=3)
+    assert r.games == 16 * 2                      # 4 archetype decks each: 16 pairings, 2 games (both seats) each
+    assert r.wins_a + r.wins_b + r.draws == r.games

@@ -39,10 +39,15 @@ STAT_FIELDS = ("damage", "heal", "shield", "poison", "combo")   # effect sizes t
 
 
 def scale_config(config: GameConfig, factor: int) -> GameConfig:
-    """The same game with HP, damage, heal, shield and the shield cap multiplied by `factor`.
-    Costs, mana and draws are unchanged, so tuning can move in finer steps."""
+    """The same game with HP, damage, heal, shield, combo bonus and the shield cap multiplied by `factor`.
+    Costs, mana and draws are unchanged, so tuning can move in finer steps.
+
+    Poison counters are NOT scaled: they fade by one each turn, so doubling them would not give the
+    same game. For a card set with poison the scaled game is therefore a slightly different game
+    (poison is relatively weaker against the larger HP); it is only a finer starting point."""
     cards = tuple(
-        replace(c, damage=c.damage * factor, heal=c.heal * factor, shield=c.shield * factor)
+        replace(c, damage=c.damage * factor, heal=c.heal * factor, shield=c.shield * factor,
+                combo=c.combo * factor)
         for c in config.cards
     )
     rules = replace(config.rules, max_hp=config.rules.max_hp * factor,

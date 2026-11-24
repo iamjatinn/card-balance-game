@@ -1,0 +1,4 @@
+model,random,aggressive,defensive,greedy,mean
+deck_mem_seed0.zip,0.7939,0.7920,0.7861,0.5918,0.7410
+deck_mem_seed1.zip,0.7998,0.8047,0.8027,0.5820,0.7473
+deck_mem_seed2.zip,0.7871,0.7842,0.7754,0.5879,0.7336

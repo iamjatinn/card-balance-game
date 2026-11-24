@@ -1,0 +1,13 @@
+Mirror matches of 'bold': 20000 games, seed 99991
+
+Card power from 20000 mirror games (win-probability change per extra starting copy, vs the median card)
+      card   effect       95% interval       z  verdict
+     venom   +16.4% [ +15.5%,  +17.2%]    37.6  TOO STRONG
+  fireball    +7.6% [  +6.7%,   +8.5%]    16.1  TOO STRONG
+    strike    +0.5% [  -0.5%,   +1.4%]     1.0  ok
+   insight    +0.3% [  -0.2%,   +0.9%]     1.1  ok
+    flurry    -0.3% [  -0.9%,   +0.2%]    -1.1  ok
+     drain    -1.5% [  -2.5%,   -0.6%]    -3.2  ok
+      heal    -2.4% [  -3.3%,   -1.4%]    -5.0  TOO WEAK
+    shield    -4.8% [  -5.7%,   -3.8%]   -10.0  TOO WEAK
+First player's win rate with identical hands: 54.6% (+/- 0.7%)

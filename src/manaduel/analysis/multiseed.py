@@ -74,13 +74,14 @@ def _eval_checkpoint(job) -> list[float]:
     torch.set_num_threads(1)
     from manaduel.agents.registry import BOT_FACTORIES
     from manaduel.agents.rl_agent import PPOAgent, load_ppo_model
-    from manaduel.sim.tournament import play_match
+    from manaduel.sim.tournament import play_match, play_match_over_decks
 
     config = _load_config(config_path)
     model = load_ppo_model(path)
     agent = lambda s: PPOAgent(model)  # noqa: E731
+    play = play_match_over_decks if config.uses_decks else play_match   # deck mode: over all deck pairings
     return [
-        play_match(config, "ppo", agent, name, factory, n_games, seed=seed).score_a
+        play(config, "ppo", agent, name, factory, n_games, seed=seed).score_a
         for name, factory in BOT_FACTORIES.items()
     ]
 
@@ -115,12 +116,13 @@ def _duel_job(job) -> float:
 
     torch.set_num_threads(1)
     from manaduel.agents.rl_agent import PPOAgent, load_ppo_model
-    from manaduel.sim.tournament import play_match
+    from manaduel.sim.tournament import play_match, play_match_over_decks
 
     config = _load_config(config_path)
     model_a, model_b = load_ppo_model(path_a), load_ppo_model(path_b)
-    return play_match(config, "a", lambda s: PPOAgent(model_a), "b", lambda s: PPOAgent(model_b),
-                      n_games, seed=seed).score_a
+    play = play_match_over_decks if config.uses_decks else play_match
+    return play(config, "a", lambda s: PPOAgent(model_a), "b", lambda s: PPOAgent(model_b),
+                n_games, seed=seed).score_a
 
 
 def head_to_head(paths_a: list[str], paths_b: list[str], n_games: int = 400, seed: int = 4242,

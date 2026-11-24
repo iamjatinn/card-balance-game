@@ -1,0 +1,10 @@
+iterations rollout  opponent                      games  MCTS wins     95% interval
+       200 greedy   random                          100      91.5%   [84.4%, 95.5%]
+       200 greedy   aggressive                      100      84.0%   [75.6%, 89.9%]
+       200 greedy   defensive                       100      67.0%   [57.3%, 75.4%]
+       200 greedy   greedy                          100      67.5%   [57.8%, 75.9%]
+       200 greedy   ppo_seed0.zip                   100      47.5%   [38.0%, 57.2%]
+       200 greedy   ppo_seed1.zip                   100      44.5%   [35.1%, 54.3%]
+       200 greedy   ppo_seed2.zip                   100      39.5%   [30.5%, 49.3%]
+       200 greedy   ppo_seed3.zip                   100      50.0%   [40.4%, 59.6%]
+       200 greedy   ppo_seed4.zip                   100      45.5%   [36.1%, 55.2%]

@@ -10,7 +10,7 @@ A turn-based card duel, built from scratch, together with the tools to study it:
 
 *The extended card set (draw, poison and combo cards): a trained agent beats the greedy bot on turn 9. Poison counters show under the mana bar.*
 
-**Status: v0.2.** v0.1 (engine, bots, tournaments, PPO, the card-power estimator and its validation, replay viewer) plus: a real-data check, a finer balancing search, three new card mechanics, finite decks, a deck metagame analysis, opponent-card memory and self-play. **Several of the new results are negative or inconclusive, and the README says so.**
+**Status: v0.3.** v0.1 (engine, bots, tournaments, PPO, the card-power estimator and its validation, replay viewer) plus: a real-data check, a finer balancing search, three new card mechanics, finite decks, a deck metagame analysis, opponent-card memory and self-play. v0.3 adds the training story (above), a hidden-information tree-search baseline, deck-mode training, balancing the extended card set with learned agents in the loop, and a tool for checking the card verdicts against human games. **Several of the new results are negative or inconclusive, and the README says so.**
 
 ## Watch an agent learn (match 1 to match N)
 
@@ -176,7 +176,78 @@ Eight decks (four archetypes plus four random ones), 2,000 games per pairing:
 
 Details: [`metagame_decks.txt`](docs/results/metagame_decks.txt).
 
-### 8. Other findings
+### 8. A search baseline: Monte Carlo tree search with a hidden opponent hand
+
+A learned agent is more convincing next to a search player that uses no training at all. [`agents/mcts.py`](src/manaduel/agents/mcts.py) is an *information-set* tree search: the opponent's hand is hidden, so every search iteration first **guesses** the opponent's hand (random cards, the true hand *size*, drawn by the cards' draw weights) and re-randomises the future card draws, so the search cannot peek at the real hand or at the game's random-number state. A test checks exactly that: swapping the opponent's hand for a different hand of the same size does not change its move. It then plays the game out with a rollout policy and passes the result up the tree (an opponent's node picks the move that is best for the opponent).
+
+How strong it is grows with search effort (the original game; 100 games per cell, so about ±10 points; [file](docs/results/mcts_effort.txt)):
+
+| Iterations per move | rollouts: random bot vs MCTS: random / greedy | rollouts: greedy bot vs MCTS: random / greedy |
+|---|---|---|
+| 25 | 86.5% / 56.0% | 81.5% / 49.0% |
+| 100 | 86.0% / 60.5% | 90.5% / 64.0% |
+| 400 | 91.5% / 66.5% | 94.0% / 70.5% |
+
+With 200 iterations and greedy rollouts ([file](docs/results/mcts_headline.txt), 100 games each): **91.5%** against random, **84.0%** against aggressive, **67.0%** against defensive and **67.5%** against greedy. Against the five PPO agents from result 1 it wins **45.4%** of 500 games (47.5, 44.5, 39.5, 50.0, 45.5), 41.1% to 49.8% as a 95% interval. PPO is slightly stronger than a 200-iteration search (PPO beats greedy and defensive about 73% and 71% of the time), by a margin that is just at the edge of what 500 games can show, and it answers in milliseconds while the search needs seconds per game. More iterations were still improving the search when this was run, so this is not a ceiling for MCTS.
+
+Limits: it supports the endless-draw game only (in deck mode the opponent's deck is also hidden, which is not modelled, so it refuses); the guess for the opponent's hand ignores what they have played; rollouts are a rough model of how both players act.
+
+### 9. Deck mode: does opponent-card memory matter there?
+
+Result 6 found that memory did not help with endless random draws and suggested it might in deck mode, where cards played narrow down what is left. It was trained and tested: three models **with** memory and three **without**, on the 20-card deck game ([`cards_decks.yaml`](configs/cards_decks.yaml)), 600,000 steps each. Each game gives both players one of four archetype decks; evaluation spreads games evenly over all 16 deck pairings.
+
+| Win rate vs (all deck pairings) | random | aggressive | defensive | greedy | mean |
+|---|---|---|---|---|---|
+| no memory (3 models) | 79.5% | 79.5% | 78.8% | 59.0% | 74.2% |
+| with memory (3 models) | 79.4% | 79.4% | 78.8% | 58.7% | 74.1% |
+
+| Model against model (9 pairings of 3 vs 3 models, about 380 games each) | Row model wins | Std across pairs |
+|---|---|---|
+| memory vs no memory | **50.7%** (ahead in 5 of 9) | 1.2 |
+| no memory vs no memory (control) | 50.5% | 1.2 |
+| memory vs memory (control) | 49.9% | 1.2 |
+
+![Deck-mode training variants](docs/deck_variants.png)
+
+**Memory made no detectable difference in deck mode either** (50.7% against a control that wanders by about ±1.2). The agents were not shown which deck the opponent brought, so memory could in principle have helped by narrowing it down; either that did not matter for these four decks, or the networks did not learn to use it in 600,000 steps. Neither explanation was tested. Raw files: [`deck_*_final.txt`](docs/results/deck_nomem_final.txt), [`deck_h2h_*.txt`](docs/results/deck_h2h_memory.txt), [curves](docs/results/deck_mem_curve_seed0.csv) (the curves use the balanced deck for both players).
+
+### 10. Balancing the extended card set: balanced for bots is not balanced for agents
+
+The tools were applied to the extended set ([`cards_extended.yaml`](configs/cards_extended.yaml): the original five cards plus Insight, Venom, Flurry), in two stages.
+
+**Stage 1, search with bots** (`tune` on a doubled-resolution copy, [`cards_extended_fine.yaml`](configs/cards_extended_fine.yaml); greedy and cautious bots, 409 configurations, 8 moves, [log](docs/results/tune_extended.txt)). For those bots it worked: the spread of card power (RMS of the effects) fell from 6.2 to 1.9 points with the greedy bot and the first-player edge went from 56.7% to 47.5%. The result is [`cards_extended_balanced.yaml`](configs/cards_extended_balanced.yaml). But three trained PPO agents on this "balanced" set find **Flurry at +20 points**: the bots hardly use the combo bonus, so the search kept raising it, while a learned agent learns to exploit it. The search had fitted the bots' weaknesses.
+
+**Stage 2, correction with agents in the loop** ([`agent_rounds.py`](src/manaduel/analysis/agent_rounds.py)). Each round trains 3 PPO agents (600,000 steps) on the current set, measures every card with them (8,000 mirror games each), and nudges each card that the agents agree is at least 3 points off, in a damped way (effect numbers scaled by 1 - effect/25 points, at most 40% per round; a card that only draws gets its cost changed). Four rounds, selected by the smallest spread: round 3, [`cards_extended_agent_balanced.yaml`](configs/cards_extended_agent_balanced.yaml) ([rounds](docs/results/agent_balance_rounds.txt)).
+
+| Round (agent-measured) | 0 (bot-tuned) | 1 | 2 | 3 (chosen) | 4 |
+|---|---|---|---|---|---|
+| Spread of card power (RMS, points) | 7.6 | 4.3 | 3.9 | **3.6** | 4.3 |
+| Worst card | Flurry +20.5 | Flurry +9.4 | Shield −7.5 | Shield −9.3 | Shield −10.9 |
+
+**Final check on new deals** (seed 424242, not used in any tuning step; [file](docs/results/ext_tuning_final.txt)). Mean of three agents per version; the last two columns use the bots instead:
+
+| Version of the extended set | Agents: spread (RMS) | Agents: worst card | Agents: cards 3+ points off | Agents: first player wins | Greedy bot: spread / first player |
+|---|---|---|---|---|---|
+| original | 6.8 | Venom +12.9 | 5 | 56.6% | 6.2 / 56.7% |
+| tuned with bots | 7.6 | Flurry +20.4 | 2 | 56.9% | **1.9 / 47.5%** |
+| tuned with agents | **3.6** | Shield −9.3 | **1** | **47.8%** | 4.7 / 44.1% |
+
+What this shows, and what it does not:
+- **Balance is relative to who plays.** The version the bots find balanced is the one the agents find worst; the version tuned with agents looks unbalanced to the bots (Flurry −8 points, first player 44%). A balance claim needs the kind of player it is about.
+- **Agent-tuning helped, but did not finish the job.** With agents the spread halved against the original (6.8 to 3.6) and four of the five off-balance cards were brought within 3 points. **Shield stays too weak**: its numbers were raised every round (14, 17, 22, 30 in doubled units) and its measured effect did not improve (−6.0, −7.5, −9.3, −10.9). Other cards changed in the same rounds, and effects are measured against the median card, so this is not a clean experiment, but it agrees with results 2, 3 and 5: Shield's power barely depends on its size.
+- The first-player edge dropped from 56.9% to 47.8% for the agents although nothing targeted it; the cause was not isolated (Insight's cost went up in round 1, which may matter).
+- Rounds were chosen on the same deals they were measured on, which favours the chosen round slightly; the new-deal check above shows the same spread (3.6), so the selection effect looks small. Three agents per version is a small sample, and the rule is a damped heuristic, not an optimiser.
+- The deck metagame (result 7) still uses the original extended cards; it was not redone with the tuned set.
+
+
+
+### 11. Checking against human players: the tool exists, the data does not
+
+Everything above is bots and learned agents. [`play`](#run-it) lets a person play the game in the terminal and, since this version, logs the cards both sides were dealt. The deal is random whoever plays, so the same card-power regression works on human games. `humancheck` runs it on the log and prints the human effects next to the bot effects, says whether the bot effect lies inside the human interval, and says how many games would be needed for a given precision. It refuses to fit with fewer than 5 games per card and warns when the intervals are too wide to see anything.
+
+**No such analysis has been done**: no human games have been logged. From the bot-based numbers (a standard error of about 0.5 points at 20,000 games) a precision of about ±2 points per card needs on the order of 5,000 human games (about 1,250 for ±4), a rough estimate. So this roadmap item is built but **not completed**, and the claim "balanced for humans" cannot be made. The tool is tested on synthetic logs with a planted effect (it recovers it); that is a test of the code, not evidence about people.
+
+### 12. Other findings
 
 - **Pure aggression is a bad strategy.** The aggressive bot plays only damage cards, so heals and shields clog its hand until the hand limit burns new damage cards. Its Elo is below random.
 - **Deterministic bots give fake precision.** In the first, deterministic version, 1,000 games between heuristic bots were really two distinct games repeated. Random draws, seat-swapped game pairs and shared deal seeds fixed this.
@@ -215,6 +286,15 @@ python -m manaduel.cli validate --bot greedy --reps 2 --null-reps 20
 python -m manaduel.cli --config configs/cards_fine.yaml tune --out configs/my_tuned.yaml
 python -m manaduel.cli --config configs/cards_decks.yaml metagame --n 2000 --build
 
+# search baseline and trained agents (results 8 and 9)
+python -m manaduel.cli mctseval --iterations 25 100 400 --rollout random greedy --opponents random greedy --n 100
+python -m manaduel.cli --config configs/cards_decks.yaml multiseed "checkpoints/deck_mem_seed?.zip" --n 500
+
+# balancing with learned agents in the loop (result 10), and your own games against the bots (result 11)
+python -m manaduel.analysis.agent_rounds --start configs/cards_extended_balanced.yaml --rounds 4 --out runs/agent_balance
+python -m manaduel.cli play --bot greedy
+python -m manaduel.cli humancheck --bot greedy
+
 # real data (download a 17Lands game_data file yourself; CC BY 4.0)
 python -m manaduel.cli realdata game_data_public.DSK.PremierDraft.csv.gz --out docs/results/real_data_DSK
 ```
@@ -242,13 +322,14 @@ configs/                  card sets: cards.yaml (original), cards_extended.yaml,
                           cards_fine.yaml (2x resolution), cards_fine_balanced.yaml (tuned)
 src/manaduel/
   engine/                 state, rules (legal actions, step), game loop, decks
-  agents/                 Agent interface, bots, PPO wrapper
+  agents/                 Agent interface, bots, PPO wrapper, MCTS (hidden-hand tree search)
   sim/                    tournaments, Wilson intervals, Elo, JSON replays
   rl/                     observation encoding, Gymnasium env, PPO training (memory, self-play)
   analysis/               card effects, sweep, validate, autobalance, balance_search, metagame,
-                          real_data, multiseed, plots
+                          real_data, multiseed, plots, search_eval, agent_balance + agent_rounds
+                          (balancing with agents in the loop), human_check
   viewer/                 text viewer and pygame replay viewer (PNG / GIF export)
-tests/                    166 tests, including the 200-game v0.1 regression
+tests/                    about 230 tests, including the 200-game v0.1 regression
 docs/                     figures, demo GIFs, raw results
 ```
 
@@ -259,13 +340,13 @@ docs/                     figures, demo GIFs, raw results
 
 ## Limitations
 
-- Everything but result 4 is simulation, and balance for bots is not balance for humans. Nothing here was checked against human players of this game.
+- Everything but result 4 is simulation, and balance for bots is not balance for humans. The human-game check (result 11) is built but has no data, so nothing here was checked against human players of this game.
 - Result 4 is real data but only one set and event type; effects are conditional on a card being in a deck its player chose; there is no ground truth for true card strength.
 - The estimator measures the value of holding a card at the **start** of the game (with how the tested agent uses it), not every effect over a whole game.
 - Validation used one bot, two repeats per change and changes of at least 14%; Shield changes could not be detected.
 - Balancing is greedy search over whole-number steps tuned with two bots. It did not produce a balanced game, and the tuned config's quality beyond the checks above is unknown.
-- Memory and self-play comparisons use three models per group; small differences are within seed noise. Deck-mode training was not run.
-- The extended card set and the deck metagame are not balanced; they were built to exercise the tools, not to be a good game.
+- Memory and self-play comparisons use three models per group; small differences are within seed noise.
+- The tuned extended set (result 10) is balanced for learned agents only up to Shield, which stays too weak, and it is not balanced for the bots. The original extended set and the deck metagame (result 7, which still uses the original extended cards) are not balanced; the game was built to exercise the tools, not to be a good game.
 - Wilson intervals assume independent games; paired deal seeds make them slightly optimistic.
 - No license has been granted yet; all rights are reserved by default.
 
@@ -273,7 +354,7 @@ docs/                     figures, demo GIFs, raw results
 
 - [x] Engine, bots, tournaments, replays, PPO (5 seeds), card-power estimator, validation, viewer
 - [x] Real-data check, finer balancing search, new mechanics, decks, metagame, memory, self-play
-- [ ] A balanced version of the extended card set (apply the tools to it)
-- [ ] Train agents in deck mode, where opponent-card memory should matter more
-- [ ] Check bot-based verdicts against human players
-- [ ] MCTS baseline (non-trivial because of hidden hands)
+- [x] A balanced version of the extended card set (apply the tools to it) (result 10: balanced for learned agents except Shield, which stays too weak; not balanced for the bots)
+- [x] Train agents in deck mode, where opponent-card memory should matter more (result 9: it made no difference)
+- [ ] Check bot-based verdicts against human players (result 11: `play` + `humancheck` are built; needs a few thousand human games, none logged yet)
+- [x] MCTS baseline (non-trivial because of hidden hands) (result 8)

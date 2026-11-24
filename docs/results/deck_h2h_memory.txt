@@ -1,0 +1,9 @@
+3 models vs 3 models, 400 games per pairing, seed 4242
+
+memory (rows) against no memory (columns): 400 games per pairing of two models
+win rate of the row model:
+  model A0    49.9%   50.9%   48.8%   mean 49.9%
+  model A1    50.0%   53.1%   51.2%   mean 51.4%
+  model A2    51.3%   51.3%   50.0%   mean 50.9%
+mean over all 9 model pairs: 50.7% (std across pairs 1.2%; best A model 51.4%, worst 49.9%)
+memory wins the pairing in 5 of 9 model pairs

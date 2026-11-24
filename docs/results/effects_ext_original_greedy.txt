@@ -1,0 +1,13 @@
+Mirror matches of 'greedy': 20000 games, seed 99991
+
+Card power from 20000 mirror games (win-probability change per extra starting copy, vs the median card)
+      card   effect       95% interval       z  verdict
+     venom   +14.7% [ +13.8%,  +15.6%]    33.0  TOO STRONG
+  fireball    +4.8% [  +3.9%,   +5.7%]    10.1  TOO STRONG
+    flurry    +1.3% [  +0.4%,   +2.2%]     2.7  ok
+   insight    +0.1% [  -0.4%,   +0.7%]     0.5  ok
+    strike    -0.1% [  -0.7%,   +0.4%]    -0.5  ok
+     drain    -3.4% [  -4.3%,   -2.5%]    -7.1  TOO WEAK
+      heal    -3.6% [  -4.5%,   -2.7%]    -7.6  TOO WEAK
+    shield    -6.6% [  -7.5%,   -5.6%]   -13.8  TOO WEAK
+First player's win rate with identical hands: 56.7% (+/- 0.7%)
