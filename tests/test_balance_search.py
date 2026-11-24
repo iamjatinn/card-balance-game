@@ -108,3 +108,14 @@ def test_search_never_accepts_a_worse_game():
     assert result.evaluations >= 1
     for m in result.moves[1:]:
         assert len(m.change) == 1
+
+
+def test_scaling_also_scales_the_combo_bonus_but_not_poison_counters():
+    from pathlib import Path
+
+    ext = load_game_config(Path("configs/cards_extended.yaml"))
+    fine = scale_config(ext, 2)
+    fl, fl2 = next(c for c in ext.cards if c.name == "flurry"), next(c for c in fine.cards if c.name == "flurry")
+    vn, vn2 = next(c for c in ext.cards if c.name == "venom"), next(c for c in fine.cards if c.name == "venom")
+    assert fl2.combo == 2 * fl.combo and fl2.damage == 2 * fl.damage
+    assert vn2.poison == vn.poison           # poison fades by 1 a turn, so it cannot simply be doubled
