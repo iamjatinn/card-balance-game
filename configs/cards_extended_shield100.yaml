@@ -1,0 +1,41 @@
+# cards_extended_agent_balanced.yaml but with rules.shield_keep_percent=100 (shield is partly kept between turns) and Shield reset to 6,
+# the starting point for balancing with agents (README result 12).
+rules:
+  max_hp: 40
+  max_mana: 5
+  max_turns: 40
+  max_shield: 12
+  start_hand: 3
+  max_hand: 6
+  draw_per_turn: 1
+  second_player_extra_cards: 0
+  deck_size: 0
+  fatigue_damage: 1
+  shield_keep_percent: 100
+cards:
+  strike:
+    cost: 1
+    damage: 7
+  fireball:
+    cost: 3
+    damage: 11
+  heal:
+    cost: 2
+    heal: 10
+  shield:
+    cost: 1
+    shield: 6
+  drain:
+    cost: 3
+    damage: 7
+    heal: 6
+  insight:
+    cost: 3
+    draw: 2
+  venom:
+    cost: 2
+    poison: 3
+  flurry:
+    cost: 1
+    damage: 1
+    combo: 6

@@ -39,6 +39,9 @@ class Rules:
     # by `fatigue_damage` each time.
     deck_size: int = 0
     fatigue_damage: int = 1
+    # Percent of a player's shield that is still there at the start of their next turn. 0 (the original rule):
+    # it all expires. 100: it stays until enemy damage uses it up (still limited by max_shield).
+    shield_keep_percent: int = 0
 
 
 def load_config(path: Path = CONFIG_PATH) -> tuple[dict[str, Card], Rules]:

@@ -65,6 +65,8 @@ def check_config(config: GameConfig) -> None:
         raise ValueError("max_hp, max_mana, max_hand and max_turns must all be at least 1")
     if rules.max_shield < 1:
         raise ValueError("max_shield must be at least 1")
+    if not 0 <= rules.shield_keep_percent <= 100:
+        raise ValueError("shield_keep_percent must be between 0 and 100")
     if rules.deck_size < 0 or rules.fatigue_damage < 1:
         raise ValueError("deck_size cannot be negative and fatigue_damage must be at least 1")
     if rules.deck_size and rules.deck_size < rules.start_hand + max(0, rules.second_player_extra_cards):
@@ -173,7 +175,7 @@ def _draw(state: GameState, player: int, count: int, config: GameConfig) -> Game
 
 def begin_turn(state: GameState, config: GameConfig) -> GameState:
     """Start-of-turn effects for the player whose turn it now is: refill mana, their old
-    shield expires, poison hurts them (ignoring shield) and fades, and they draw cards
+    shield expires (or part of it stays, see rules.shield_keep_percent), poison hurts them (ignoring shield) and fades, and they draw cards
     (except on turn 1: the very first player does not draw)."""
     own_turn = (state.turn + 1) // 2  # turns 1,2 -> 1; turns 3,4 -> 2; ...
     players = list(state.players)
@@ -181,7 +183,7 @@ def begin_turn(state: GameState, config: GameConfig) -> GameState:
     players[state.current] = replace(
         me,
         mana=min(own_turn, config.rules.max_mana),
-        shield=0,
+        shield=me.shield * config.rules.shield_keep_percent // 100,   # 0: expires, 100: stays until used
         combo=0,
         hp=me.hp - me.poison,
         poison=max(0, me.poison - 1),

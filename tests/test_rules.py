@@ -163,3 +163,59 @@ def test_shield_expires_at_start_of_owners_next_turn():
 def test_no_legal_actions_after_someone_dies():
     s = with_player(new_game(CFG), 1, hp=0)
     assert legal_actions(s, CFG) == []
+
+
+# ---- the shield persistence rule ---------------------------------------------------------
+
+def _with_keep(percent):
+    from dataclasses import replace
+
+    from manaduel.engine.rules import GameConfig, load_game_config
+
+    base = load_game_config()
+    return GameConfig(cards=base.cards, rules=replace(base.rules, shield_keep_percent=percent))
+
+
+def _shielded_state(config, shield):
+    from dataclasses import replace
+
+    from manaduel.engine.rules import new_game
+
+    state = new_game(config, seed=2)
+    me = replace(state.players[0], shield=shield, mana=config.rules.max_mana)
+    return replace(state, players=(me, state.players[1]))
+
+
+def test_shield_expires_by_default_and_can_be_kept_in_part_or_in_full():
+    from manaduel.engine.rules import step
+
+    for percent, expected in ((0, 0), (50, 2), (100, 5)):
+        config = _with_keep(percent)
+        state = _shielded_state(config, 5)
+        after_my_turn = step(state, config.end_turn, config)          # opponent's turn begins
+        back_to_me = step(after_my_turn, config.end_turn, config)     # my next turn begins
+        assert back_to_me.players[0].shield == expected, percent
+
+
+def test_kept_shield_still_absorbs_damage_first():
+    from dataclasses import replace
+
+    from manaduel.engine.rules import step
+
+    config = _with_keep(100)
+    state = _shielded_state(config, 5)
+    state = replace(state, current=1, players=(state.players[0], replace(state.players[1], mana=5,
+                    hand=tuple(2 if i == 0 else 0 for i in range(len(config.cards))))))
+    after = step(state, 0, config)                                   # opponent plays Strike (3 damage)
+    assert after.players[0].shield == 2 and after.players[0].hp == state.players[0].hp
+
+
+def test_the_keep_percent_must_be_a_percentage():
+    import pytest
+
+    from manaduel.engine.rules import check_config
+
+    with pytest.raises(ValueError):
+        check_config(_with_keep(101))
+    with pytest.raises(ValueError):
+        check_config(_with_keep(-1))
