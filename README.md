@@ -12,6 +12,33 @@ A turn-based card duel, built from scratch, together with the tools to study it:
 
 **Status: v0.2.** v0.1 (engine, bots, tournaments, PPO, the card-power estimator and its validation, replay viewer) plus: a real-data check, a finer balancing search, three new card mechanics, finite decks, a deck metagame analysis, opponent-card memory and self-play. **Several of the new results are negative or inconclusive, and the README says so.**
 
+## Watch an agent learn (match 1 to match N)
+
+`python -m manaduel.cli story` trains an agent from scratch, records **every training match**, tests the agent at regular checkpoints on the same fresh games, and draws shareable pictures from the saved numbers (nothing is typed in by hand). One real run ([`docs/story/`](docs/story)): 28,692 training matches, 259 seconds of CPU training, no GPU.
+
+![Training story card](docs/story/linkedin_card.png)
+
+| Average win rate vs the four bots | Before training (match 0) | After 28,692 matches |
+|---|---|---|
+| overall | 48% | **82%** |
+| random / aggressive | 59% / 69% | 93% / 93% |
+| defensive / greedy | 31% / 34% | 69% / 72% |
+
+What changed in its play, measured on the test games: it plays Shield 2.8x as often (0.9 to 2.4 times per game) and finishes games with an average HP lead of +8.8 instead of -1.5; game length did not change (about 21 turns). Most of the learning happens in the first ~3,000 matches, then the curve flattens at about 80%.
+
+- Animated curve and win rates growing from match 1: [`learning_animation.gif`](docs/story/learning_animation.gif)
+- The untrained and the trained agent in the same game against the same bot: [`before_after.gif`](docs/story/before_after.gif) (a chosen example; the table above is the honest summary)
+- Which cards it plays before and after: [`behaviour.png`](docs/story/behaviour.png); a draft caption using the real numbers: [`linkedin_post.md`](docs/story/linkedin_post.md)
+- Raw data: [`matches.csv`](docs/story/matches.csv) (one row per training match) and [`checkpoints.csv`](docs/story/checkpoints.csv)
+
+Two curves, not one: the blue line is the results of the matches the agent *trained on* (against a random mix of bots, while still exploring); the green line is the finished policy tested on the same fresh games at each checkpoint, so differences come from the agent alone. The match-0 baseline uses 100 test games per bot and the final point 500, so the starting numbers are noisier. One run, one seed: it shows that learning happened, not how reliably a fresh run lands on 82% (the five-seed results below show a spread of about one point between runs of the same recipe).
+
+```powershell
+python -m manaduel.cli story                                  # train + record + draw (about 10 minutes)
+python -m manaduel.cli story --steps 100000 --out docs/quick  # a quick version
+python -m manaduel.cli story --render-only --footer "your link"   # redraw from an existing recording
+```
+
 ## The game
 
 Two players start at 20 HP and alternate turns.

@@ -45,6 +45,25 @@ def make_env(config, memory=False, decks=None):
     return _init
 
 
+def build_model(vec_env, seed: int = 0) -> MaskablePPO:
+    """The PPO settings used everywhere in this project (training runs and the training story)."""
+    return MaskablePPO(
+        "MlpPolicy",
+        vec_env,
+        learning_rate=3e-4,
+        n_steps=256,          # steps collected per game before each update
+        batch_size=256,
+        n_epochs=10,
+        gamma=0.99,           # how much future reward matters
+        gae_lambda=0.95,
+        ent_coef=0.01,        # a little extra exploration
+        policy_kwargs=dict(net_arch=[128, 128]),
+        seed=seed,
+        device="cpu",
+        verbose=0,
+    )
+
+
 def evaluate(model, config, n_games: int) -> dict:
     """Win rate (draw = half) of the model against each bot, on a fixed set of games."""
     agent = lambda seed: PPOAgent(model)
@@ -85,21 +104,7 @@ def main() -> None:
     config = load_game_config(Path(args.config)) if args.config else load_game_config()
     decks = list(archetype_decks(config).values()) if config.uses_decks else None
     vec_env = DummyVecEnv([make_env(config, args.memory, decks) for _ in range(args.envs)])
-    model = MaskablePPO(
-        "MlpPolicy",
-        vec_env,
-        learning_rate=3e-4,
-        n_steps=256,          # steps collected per game before each update
-        batch_size=256,
-        n_epochs=10,
-        gamma=0.99,           # how much future reward matters
-        gae_lambda=0.95,
-        ent_coef=0.01,        # a little extra exploration
-        policy_kwargs=dict(net_arch=[128, 128]),
-        seed=args.seed,
-        device="cpu",
-        verbose=0,
-    )
+    model = build_model(vec_env, args.seed)
 
     log_path = Path(args.log)
     log_path.parent.mkdir(parents=True, exist_ok=True)

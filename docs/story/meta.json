@@ -1,0 +1,20 @@
+{
+  "config": "cards.yaml",
+  "steps": 600000,
+  "chunk_steps": 25000,
+  "eval_games": 100,
+  "final_games": 500,
+  "envs": 8,
+  "seed": 0,
+  "algorithm": "MaskablePPO (sb3-contrib)",
+  "opponents": [
+    "random",
+    "aggressive",
+    "defensive",
+    "greedy"
+  ],
+  "finished": true,
+  "matches": 28692,
+  "seconds": 258.6,
+  "wall_seconds": 395.2
+}

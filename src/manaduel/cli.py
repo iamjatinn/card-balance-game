@@ -259,6 +259,32 @@ def _figures(args, config, factories) -> None:
     print("Wrote " + ", ".join(str(out / m) for m in made) if made else "Nothing to draw: give --curves, --validation or --effects-bot")
 
 
+def _story(args, config, factories) -> None:
+    out = Path(args.out)
+    if not args.render_only:
+        from manaduel.story.record import run_story
+
+        config_name = Path(args.config).name if args.config else "cards.yaml"
+        print(f"Recording a training story into {out}: {args.steps:,} steps from scratch, "
+              f"a test every {args.chunk:,} steps ({args.eval_games} games per bot)\n", flush=True)
+        run_story(config, out, args.steps, args.chunk, args.eval_games, args.final_games, args.envs,
+                  args.seed, config_name, log=lambda text: print(text, flush=True))
+    if args.no_render:
+        return
+    from manaduel.story.render import render_story
+
+    print("\nDrawing the pictures from the recording...", flush=True)
+    made = render_story(out, config, args.bot, args.footer, log=lambda text: print(text, flush=True))
+    print("\nWrote:")
+    for key, value in made.items():
+        if key != "example":
+            print(f"  {value}")
+    ex = made["example"]
+    print(f"\nBefore/after example: game seed {ex['seed']} vs the {ex['bot']} bot "
+          f"(untrained agent lost in {ex['before_turns']} turns, trained agent won in {ex['after_turns']}). "
+          "It is a chosen example; the card shows the honest averages.")
+
+
 def _play(args, config, factories) -> None:
     import random
 
@@ -457,6 +483,19 @@ def main(argv=None) -> None:
     fg.add_argument("--effects-bot", help="measure card power with this bot and plot it")
     fg.add_argument("--effects-n", type=int, default=20000)
 
+    st = sub.add_parser("story", help="train an agent from scratch while recording it, then draw shareable visuals")
+    st.add_argument("--steps", type=int, default=600_000, help="training steps (about 30,000 matches per 600,000)")
+    st.add_argument("--chunk", type=int, default=25_000, help="steps between checkpoint tests")
+    st.add_argument("--eval-games", type=int, default=100, help="test games per bot at each checkpoint")
+    st.add_argument("--final-games", type=int, default=500, help="test games per bot at the last checkpoint")
+    st.add_argument("--envs", type=int, default=8, help="matches played in parallel while training")
+    st.add_argument("--seed", type=int, default=0)
+    st.add_argument("--out", default="docs/story", help="folder for the recording and the pictures")
+    st.add_argument("--render-only", action="store_true", help="skip training; redraw from an existing recording")
+    st.add_argument("--no-render", action="store_true", help="only record, do not draw the pictures")
+    st.add_argument("--bot", default="greedy", help="opponent in the before/after replay")
+    st.add_argument("--footer", default="", help="text for the bottom of the card, e.g. your project link")
+
     pl = sub.add_parser("play", help="play a game yourself in the terminal against a bot")
     pl.add_argument("--bot", default="greedy", help="who you play against")
     pl.add_argument("--seat", default="random", choices=["0", "1", "random"], help="0 = you move first")
@@ -479,7 +518,7 @@ def main(argv=None) -> None:
     config = load_game_config(Path(args.config)) if args.config else load_game_config()
     factories = _factories(getattr(args, "ppo", None))
     handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
-                "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view, "play": _play,
+                "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view, "play": _play, "story": _story,
                 "multiseed": _multiseed, "headtohead": _headtohead, "figures": _figures, "realdata": _realdata,
                 "tune": _tune, "metagame": _metagame}
     handlers[args.command](args, config, factories)
