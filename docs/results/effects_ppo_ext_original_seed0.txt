@@ -1,0 +1,13 @@
+Mirror matches of 'ppo': 8000 games, seed 0
+
+Card power from 8000 mirror games (win-probability change per extra starting copy, vs the median card)
+      card   effect       95% interval       z  verdict
+     venom   +12.7% [ +11.4%,  +14.1%]    18.1  TOO STRONG
+    flurry    +4.8% [  +3.3%,   +6.2%]     6.4  TOO STRONG
+  fireball    +2.9% [  +1.4%,   +4.4%]     3.9  TOO STRONG
+   insight    +1.4% [  +0.6%,   +2.3%]     3.3  ok
+    strike    -1.4% [  -2.3%,   -0.6%]    -3.3  ok
+      heal    -4.2% [  -5.7%,   -2.7%]    -5.6  TOO WEAK
+     drain    -4.2% [  -5.7%,   -2.8%]    -5.7  TOO WEAK
+    shield   -10.0% [ -11.4%,   -8.5%]   -13.5  TOO WEAK
+First player's win rate with identical hands: 58.8% (+/- 1.0%)

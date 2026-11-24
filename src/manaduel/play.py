@@ -18,7 +18,9 @@ from manaduel.engine.state import is_terminal, winner
 from manaduel.sim.replay import save_replay
 from manaduel.sim.stats import wilson_interval
 
-LOG_COLUMNS = ["date", "config", "bot", "human_seat", "seed", "result", "turns"]
+# human_hand / bot_hand: copies of each card type dealt at the start (the random deal that the card-power
+# check in analysis/human_check.py relies on), numbers separated by spaces in card order.
+LOG_COLUMNS = ["date", "config", "bot", "human_seat", "seed", "result", "turns", "human_hand", "bot_hand"]
 
 
 def describe_card(card) -> str:
@@ -115,7 +117,9 @@ def record(result, config, human_seat, bot_name, seed, config_name, log_path="ru
         w = csv.writer(f)
         if new_file:
             w.writerow(LOG_COLUMNS)
-        w.writerow([datetime.date.today().isoformat(), config_name, bot_name, human_seat, seed, outcome, result.turns])
+        hands = result.start_hands
+        w.writerow([datetime.date.today().isoformat(), config_name, bot_name, human_seat, seed, outcome, result.turns,
+                    " ".join(map(str, hands[human_seat])), " ".join(map(str, hands[1 - human_seat]))])
     return replay
 
 

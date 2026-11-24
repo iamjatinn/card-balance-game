@@ -25,6 +25,9 @@ from manaduel.viewer.terminal import render_game
 def _factories(ppo_path):
     """The hand-written bots, plus 'ppo' if a trained model file is given."""
     factories = dict(ALL_BOT_FACTORIES)
+    from manaduel.agents.mcts import MCTSAgent
+
+    factories["mcts"] = lambda seed: MCTSAgent(seed=seed)       # slow: a search bot, opt-in by name
     if ppo_path:
         from manaduel.agents.rl_agent import PPOAgent, load_ppo_model
 
@@ -312,6 +315,43 @@ def _play(args, config, factories) -> None:
     print(f"\nSaved the replay to {replay} (watch it with: view {replay}) and logged the game to {args.log}")
 
 
+def _mctseval(args, config, factories) -> None:
+    from manaduel.analysis import search_eval
+
+    opponents = list(args.opponents)
+    print(f"MCTS evaluation: iterations {args.iterations}, rollouts {args.rollout}, opponents {opponents}, "
+          f"{args.n} games each, seed {args.seed}\n", flush=True)
+    rows = search_eval.evaluate(args.iterations, args.rollout, opponents, args.n, args.seed,
+                                workers=args.workers, config_path=args.config,
+                                progress=lambda d, t: print(f"  {d}/{t} jobs done", flush=True))
+    text = search_eval.format_rows(rows)
+    print("\n" + text)
+    if args.out:
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.out).write_text(text + "\n", encoding="utf-8")
+        print(f"\nSaved {args.out}")
+
+
+def _humancheck(args, config, factories) -> None:
+    from manaduel.analysis import human_check
+
+    config_name = args.config_name or (Path(args.config).name if args.config else "cards.yaml")
+    try:
+        loaded = human_check.load_human_games(args.log, config, config_name, args.vs)
+    except FileNotFoundError as error:
+        raise SystemExit(str(error))
+    k = len(config.cards)
+    n = len(loaded.games.score0)
+    print(f"{n} human games usable in {args.log} (card set {config_name}, skipped {loaded.skipped})")
+    if n < 5 * k:
+        raise SystemExit(f"too few games to fit {k} card effects (need at least {5 * k}, have {n}); "
+                         "keep playing: python -m manaduel.cli play")
+    human = estimate_effects(loaded.games)
+    bots = estimate_effects(collect(config, _pick(factories, args.bot), args.bot_n, args.seed))
+    print()
+    print(human_check.format_comparison(human, bots, args.bot))
+
+
 def _view(args, config, factories) -> None:
     # Imported here so the rest of the project works without pygame installed.
     from manaduel.viewer import pygame_viewer
@@ -509,6 +549,24 @@ def main(argv=None) -> None:
     pl.add_argument("--summary", action="store_true", help="show your win rate so far instead of playing")
     pl.add_argument("--ppo", help="path to a trained model; makes 'ppo' available as an opponent")
 
+    me = sub.add_parser("mctseval", help="how strong is the tree-search bot against bots and trained models")
+    me.add_argument("--iterations", nargs="+", type=int, default=[200], help="search iterations per move")
+    me.add_argument("--rollout", nargs="+", default=["greedy"], choices=["random", "greedy"])
+    me.add_argument("--opponents", nargs="+", default=["random", "aggressive", "defensive", "greedy"],
+                    help='bot names or "ppo:path/to/model.zip"')
+    me.add_argument("--n", type=int, default=200, help="games per setting per opponent (even)")
+    me.add_argument("--seed", type=int, default=31337)
+    me.add_argument("--workers", type=int, default=None)
+    me.add_argument("--out", help="write the table to this text file")
+
+    hc = sub.add_parser("humancheck", help="compare card power in logged human games with the bot-based numbers")
+    hc.add_argument("--log", default="runs/human_games.csv")
+    hc.add_argument("--vs", help="only games against this bot")
+    hc.add_argument("--config-name", help="card set file name as logged (default: derived from --config)")
+    hc.add_argument("--bot", default="greedy", help="bot for the mirror-game comparison")
+    hc.add_argument("--bot-n", type=int, default=20000, help="mirror games for the bot side")
+    hc.add_argument("--seed", type=int, default=0)
+
     vw = sub.add_parser("view", help="watch a saved replay in a window (needs pygame)")
     vw.add_argument("replay", help="a replay JSON from: watch --save")
     vw.add_argument("--speed", type=float, default=1.0)
@@ -524,7 +582,7 @@ def main(argv=None) -> None:
     handlers = {"watch": _watch, "tournament": _tournament, "effects": _effects,
                 "sweep": _sweep, "autobalance": _autobalance, "validate": _validate, "view": _view, "play": _play, "story": _story,
                 "multiseed": _multiseed, "headtohead": _headtohead, "figures": _figures, "realdata": _realdata,
-                "tune": _tune, "metagame": _metagame}
+                "tune": _tune, "metagame": _metagame, "mctseval": _mctseval, "humancheck": _humancheck}
     handlers[args.command](args, config, factories)
 
 

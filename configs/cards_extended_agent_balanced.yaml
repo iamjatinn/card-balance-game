@@ -1,0 +1,40 @@
+# The extended card set balanced with trained agents in the loop (analysis/agent_rounds.py, round 3 of 4), starting from
+# cards_extended_balanced.yaml (tuned with bots). Numbers are in doubled units (HP 40). Shield remains too weak. See README result 10.
+rules:
+  max_hp: 40
+  max_mana: 5
+  max_turns: 40
+  max_shield: 22
+  start_hand: 3
+  max_hand: 6
+  draw_per_turn: 1
+  second_player_extra_cards: 0
+  deck_size: 0
+  fatigue_damage: 1
+cards:
+  strike:
+    cost: 1
+    damage: 7
+  fireball:
+    cost: 3
+    damage: 11
+  heal:
+    cost: 2
+    heal: 10
+  shield:
+    cost: 1
+    shield: 22
+  drain:
+    cost: 3
+    damage: 7
+    heal: 6
+  insight:
+    cost: 3
+    draw: 2
+  venom:
+    cost: 2
+    poison: 3
+  flurry:
+    cost: 1
+    damage: 1
+    combo: 6

@@ -74,6 +74,23 @@ def play_match(config, name_a, factory_a, name_b, factory_b, n_games, seed=0, de
             wins_b += 1
     return MatchResult(name_a, name_b, wins_a, wins_b, draws, first_wins, turns_total)
 
+def play_match_over_decks(config, name_a, factory_a, name_b, factory_b, n_games, seed=0, decks=None) -> MatchResult:
+    """Deck mode: like play_match, but spread the games evenly over every ordered pair of decks
+    (A's deck, B's deck) from `decks` (default: the four archetype decks), so a result does not
+    depend on one lucky deck matchup. Each pair gets at least 2 games (one per seat order)."""
+    from manaduel.engine.decks import archetype_decks
+
+    pool = list(decks) if decks is not None else list(archetype_decks(config).values())
+    pairs = [(a, b) for a in pool for b in pool]
+    per_pair = max(2, 2 * round(n_games / len(pairs) / 2))
+    total = None
+    for k, pair in enumerate(pairs):
+        r = play_match(config, name_a, factory_a, name_b, factory_b, per_pair, seed=seed + 7919 * k, decks=pair)
+        total = r if total is None else MatchResult(
+            name_a, name_b, total.wins_a + r.wins_a, total.wins_b + r.wins_b, total.draws + r.draws,
+            total.first_player_wins + r.first_player_wins, total.turns_total + r.turns_total)
+    return total
+
 
 def round_robin(config, factories: dict, n_games: int, seed: int = 0) -> list[MatchResult]:
     """Every bot plays every other bot, and also a copy of itself (the 'mirror'

@@ -1,0 +1,13 @@
+iterations rollout  opponent                      games  MCTS wins     95% interval
+        25 random   random                          100      86.5%   [78.4%, 91.9%]
+        25 random   greedy                          100      56.0%   [46.2%, 65.3%]
+        25 greedy   random                          100      81.5%   [72.8%, 87.9%]
+        25 greedy   greedy                          100      49.0%   [39.4%, 58.7%]
+       100 random   random                          100      86.0%   [77.9%, 91.5%]
+       100 random   greedy                          100      60.5%   [50.7%, 69.5%]
+       100 greedy   random                          100      90.5%   [83.2%, 94.8%]
+       100 greedy   greedy                          100      64.0%   [54.2%, 72.7%]
+       400 random   random                          100      91.5%   [84.4%, 95.5%]
+       400 random   greedy                          100      66.5%   [56.8%, 75.0%]
+       400 greedy   random                          100      94.0%   [87.5%, 97.2%]
+       400 greedy   greedy                          100      70.5%   [60.9%, 78.5%]
