@@ -160,7 +160,7 @@ Nine PPO models: three seeds each of **bots-only** (the v0.1 recipe), **+ oppone
 | self-play vs with memory | 53.4% | 2.2 | 9 of 9 |
 
 How to read it, honestly:
-- **Memory did not help**, and was slightly worse head to head (48.2%, behind in all 9 pairings, while the control varies by about ±1.6). With three models per group this is suggestive, not proof. A plausible reason (not tested): with endless random draws, the opponent's played cards say little about their hand, and the extra inputs may only slow learning. In deck mode, where played cards narrow down the remaining deck, memory could matter; that was not trained.
+- **Memory did not help**, and was slightly worse head to head (48.2%, behind in all 9 pairings, while the control varies by about ±1.6). With three models per group this is suggestive, not proof. A plausible reason (not tested): with endless random draws, the opponent's played cards say little about their hand, and the extra inputs may only slow learning. In deck mode, where played cards narrow down the remaining deck, memory could matter; it was trained there too (result 9) and made no difference either.
 - **Self-play's advantage (51.2% vs the 50.0% control) is smaller than the seed-to-seed spread**, so it is not established. It beat the memory models in all 9 pairings, but those models also carry memory's penalty.
 - Against the hardest bot (greedy) the agents win only about 64%, down from 73% in the original game, while crushing the other three: the new cards are not balanced against each other (result 7).
 
@@ -356,8 +356,11 @@ Use `.\.venv\Scripts\python.exe` in place of `python` if the environment is not 
 ## How it is built
 
 ```
-configs/                  card sets: cards.yaml (original), cards_extended.yaml, cards_decks.yaml,
-                          cards_fine.yaml (2x resolution), cards_fine_balanced.yaml (tuned)
+configs/                  card sets: cards.yaml (original), cards_extended.yaml (+ draw, poison, combo),
+                          cards_decks.yaml (deck mode), cards_fine.yaml / cards_fine_balanced.yaml (2x resolution,
+                          tuned), cards_extended_fine / _balanced / _agent_balanced / _final.yaml (the extended
+                          set through the tuning stages; _final is the balanced one), cards_decks_final.yaml
+                          (deck mode with the final cards)
 src/manaduel/
   engine/                 state, rules (legal actions, step), game loop, decks
   agents/                 Agent interface, bots, PPO wrapper, MCTS (hidden-hand tree search)
@@ -366,8 +369,10 @@ src/manaduel/
   analysis/               card effects, sweep, validate, autobalance, balance_search, metagame,
                           real_data, multiseed, plots, search_eval, agent_balance + agent_rounds
                           (balancing with agents in the loop), human_check
+  story/                  records a training run match by match and draws the shareable pictures
   viewer/                 text viewer and pygame replay viewer (PNG / GIF export)
-tests/                    about 230 tests, including the 200-game v0.1 regression
+scripts/                  the exact scripts behind the long runs (shield diagnosis, evaluations, final checks)
+tests/                    226 tests, including the 200-game v0.1 regression
 docs/                     figures, demo GIFs, raw results
 ```
 
@@ -382,7 +387,8 @@ docs/                     figures, demo GIFs, raw results
 - Result 4 is real data but only one set and event type; effects are conditional on a card being in a deck its player chose; there is no ground truth for true card strength.
 - The estimator measures the value of holding a card at the **start** of the game (with how the tested agent uses it), not every effect over a whole game.
 - Validation used one bot, two repeats per change and changes of at least 14%; Shield changes could not be detected.
-- Balancing is greedy search over whole-number steps tuned with two bots. It did not produce a balanced game, and the tuned config's quality beyond the checks above is unknown.
+- Balancing is search over whole-number steps. On the original game it did not produce a balanced game (result 5). On the extended set the bot-based search overfitted the bots (result 10), so the final set was corrected with only three trained agents per round, and some levers are coarse (Venom's poison counter can only jump from 3 to 4, a third bigger), so the last round's worst card keeps moving around.
+- The MCTS bot (result 8) supports endless-draw games only, was tested with 100 games per setting, and was still improving with more search when measured.
 - Memory and self-play comparisons use three models per group; small differences are within seed noise.
 - The final extended set (result 12) is balanced for three learned agents in endless-draw play only: not for the hand-written bots, not for deck mode (the deck builder still finds a Heal + Venom deck that beats the field, and Insight behaves differently there), and the first-player edge is now slightly reversed (46%). It needed a rule change for Shield. The original extended set is not balanced; the game was built to exercise the tools, not to be a good game.
 - Wilson intervals assume independent games; paired deal seeds make them slightly optimistic.
