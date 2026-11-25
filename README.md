@@ -48,7 +48,7 @@ Two players start at 20 HP and alternate turns.
 - **Mana:** at the start of your own turn it refills to `min(your turn number, 5)`. Unspent mana is lost.
 - **Hand:** you start with 3 random cards and draw 1 at the start of each turn (the first player skips the draw on turn 1). The hand limit is 6; extra cards are burned. Draws are random with replacement, weighted by each card's `weight`.
 - **On your turn** you may play any number of held, affordable cards, then end the turn.
-- **Shield** absorbs damage before HP, is capped at 6, and expires at the start of its owner's next turn.
+- **Shield** absorbs damage before HP, is capped at 6, and expires at the start of its owner's next turn (a rule, `shield_keep_percent`, can keep it longer; see result 12).
 - You win by reducing the opponent to 0 HP. If both players are alive after turn 40, it is a draw.
 
 | Card | Cost | Effect |
@@ -237,7 +237,7 @@ What this shows, and what it does not:
 - **Agent-tuning helped, but did not finish the job.** With agents the spread halved against the original (6.8 to 3.6) and four of the five off-balance cards were brought within 3 points. **Shield stays too weak**: its numbers were raised every round (14, 17, 22, 30 in doubled units) and its measured effect did not improve (−6.0, −7.5, −9.3, −10.9). Other cards changed in the same rounds, and effects are measured against the median card, so this is not a clean experiment, but it agrees with results 2, 3 and 5: Shield's power barely depends on its size.
 - The first-player edge dropped from 56.9% to 47.8% for the agents although nothing targeted it; the cause was not isolated (Insight's cost went up in round 1, which may matter).
 - Rounds were chosen on the same deals they were measured on, which favours the chosen round slightly; the new-deal check above shows the same spread (3.6), so the selection effect looks small. Three agents per version is a small sample, and the rule is a damped heuristic, not an optimiser.
-- The deck metagame (result 7) still uses the original extended cards; it was not redone with the tuned set.
+- Shield stayed too weak in this stage; result 12 explains why and fixes it with a rule change.
 
 
 
@@ -247,7 +247,44 @@ Everything above is bots and learned agents. [`play`](#run-it) lets a person pla
 
 **No such analysis has been done**: no human games have been logged. From the bot-based numbers (a standard error of about 0.5 points at 20,000 games) a precision of about ±2 points per card needs on the order of 5,000 human games (about 1,250 for ±4), a rough estimate. So this roadmap item is built but **not completed**, and the claim "balanced for humans" cannot be made. The tool is tested on synthetic logs with a planted effect (it recovers it); that is a test of the code, not evidence about people.
 
-### 12. Other findings
+### 12. Fixing Shield: it needed a rule change, not a bigger number
+
+**Why Shield was weak.** Shield expires at the start of its owner's next turn, so it can only absorb damage during the single enemy turn it lasts. [`scripts/shield_diagnosis.py`](scripts/shield_diagnosis.py) counts, in 300 mirror games of trained agents, how much of the shield they gain actually absorbs damage:
+
+| Card set | Shield cards played per game | Shield points gained | Points that absorbed damage | HP absorbed per Shield card |
+|---|---|---|---|---|
+| original game | 5.3 | 4,755 | 591 (**12%**) | 0.37 |
+| extended set after result 10 | 3.5 | 23,166 | 838 (**4%**) | 0.79 |
+
+What a Shield can absorb is limited by the damage the opponent deals in that one turn, not by the number on the card, which is why raising it round after round (result 10) did nothing.
+
+**The fix: a new rule.** `shield_keep_percent` (default 0, the original rule, so every earlier result is unchanged: the 200-game regression still passes) says how much shield is still there at the start of its owner's next turn; 100 keeps it until enemy damage uses it up (the cap `max_shield` still applies). Both variants started from the result-10 set with Shield reset to its original size and went through the same agent-in-the-loop rounds:
+- **50%**: Shield stayed at −9.6 and −9.4 points; stopped after two rounds. Not enough.
+- **100%**: Shield was at −4.0 on the first measurement and within 3 points after one correction round. [`cards_extended_final.yaml`](configs/cards_extended_final.yaml) is round 1 ([all rounds](docs/results/shield/shield100_rounds.txt)). Later rounds did not improve it: the worst card moved around (Fireball +5.4, Venom +5.5, then −5.6) because Venom's poison counter can only jump from 3 to 4 (a third bigger), and with three agents the measurements are noisy.
+
+**Check on new deals** (seed 777777, not used in any tuning step; mean of 3 trained agents per version, 8,000 mirror games each; [file](docs/results/ext_final_four_versions.txt)):
+
+| Version of the extended set | Spread of card power (RMS, points) | Shield | Worst card | Cards 3+ points off | First player wins |
+|---|---|---|---|---|---|
+| original | 6.8 | −10.8 | Venom +13.1 | 4 | 56.7% |
+| tuned with bots (result 10) | 7.6 | −2.5 | Flurry +20.5 | 2 | 57.0% |
+| tuned with agents (result 10) | 3.7 | −9.3 | Shield −9.3 | 1 | 47.8% |
+| **final (Shield persists)** | **1.8** | **−0.2** | Insight +3.4 | 1 | 46.1% |
+
+**Limits.** A persistent shield is a different card (armour rather than a one-turn guard), so this is a change to the game, not only to numbers. The final set is balanced for these learned agents; the hand-written bots again disagree (they see Flurry −5.5, Insight +5.3, Venom +4.7 and a first-player rate of 43%). The first-player edge is now reversed (the second player wins about 54%); nothing targeted it and the integer levers for it are coarse. Three agents per version is small, and the round was chosen on the same deals it was measured on (the new-deal check shows the same 1.8).
+
+**The deck metagame, redone on the final set** ([`cards_decks_final.yaml`](configs/cards_decks_final.yaml), greedy bot, same eight-deck method as result 7; [file](docs/results/metagame_decks_final.txt)):
+
+| | Result 7 (original extended cards) | With the final set |
+|---|---|---|
+| Best deck's average win rate against the others | 82.3% (aggro) | 62.5% (random1; aggro 57.6%) |
+| Equilibrium mix | 100% on one deck | 3 of 8 decks (78.5%, 18.6%, 2.5%) |
+| Rock-paper-scissors cycles | none | 2 |
+| Control deck (heals, shields) | loses every game | still loses almost every game (7.6% average) |
+
+The card fixes made the metagame healthier, but the deck builder still finds an exploit: hill climbing from the balanced deck ends at **6 Heal + 6 Venom** (poison that ignores shields, plus healing) and wins 83.2% against the field on new games, after which the equilibrium puts 99.9% on it. This was only tested against the greedy bot. Also, in deck mode the two card-power measures disagree (correlation −0.27): Insight is +7.0 per opening-hand copy but −5.6 per deck copy, which may be because drawing cards uses up a 20-card deck faster and fatigue starts earlier (a guess, not tested). So the final set is balanced for endless-draw play, **not for deck play**, which would need its own agent-in-the-loop rounds in deck mode.
+
+### 13. Other findings
 
 - **Pure aggression is a bad strategy.** The aggressive bot plays only damage cards, so heals and shields clog its hand until the hand limit burns new damage cards. Its Elo is below random.
 - **Deterministic bots give fake precision.** In the first, deterministic version, 1,000 games between heuristic bots were really two distinct games repeated. Random draws, seat-swapped game pairs and shared deal seeds fixed this.
@@ -292,6 +329,7 @@ python -m manaduel.cli --config configs/cards_decks.yaml multiseed "checkpoints/
 
 # balancing with learned agents in the loop (result 10), and your own games against the bots (result 11)
 python -m manaduel.analysis.agent_rounds --start configs/cards_extended_balanced.yaml --rounds 4 --out runs/agent_balance
+python scripts/shield_diagnosis.py configs/cards.yaml checkpoints/ppo_seed0.zip 300   # how much shield is wasted (result 12)
 python -m manaduel.cli play --bot greedy
 python -m manaduel.cli humancheck --bot greedy
 
@@ -346,7 +384,7 @@ docs/                     figures, demo GIFs, raw results
 - Validation used one bot, two repeats per change and changes of at least 14%; Shield changes could not be detected.
 - Balancing is greedy search over whole-number steps tuned with two bots. It did not produce a balanced game, and the tuned config's quality beyond the checks above is unknown.
 - Memory and self-play comparisons use three models per group; small differences are within seed noise.
-- The tuned extended set (result 10) is balanced for learned agents only up to Shield, which stays too weak, and it is not balanced for the bots. The original extended set and the deck metagame (result 7, which still uses the original extended cards) are not balanced; the game was built to exercise the tools, not to be a good game.
+- The final extended set (result 12) is balanced for three learned agents in endless-draw play only: not for the hand-written bots, not for deck mode (the deck builder still finds a Heal + Venom deck that beats the field, and Insight behaves differently there), and the first-player edge is now slightly reversed (46%). It needed a rule change for Shield. The original extended set is not balanced; the game was built to exercise the tools, not to be a good game.
 - Wilson intervals assume independent games; paired deal seeds make them slightly optimistic.
 - No license has been granted yet; all rights are reserved by default.
 
@@ -354,7 +392,8 @@ docs/                     figures, demo GIFs, raw results
 
 - [x] Engine, bots, tournaments, replays, PPO (5 seeds), card-power estimator, validation, viewer
 - [x] Real-data check, finer balancing search, new mechanics, decks, metagame, memory, self-play
-- [x] A balanced version of the extended card set (apply the tools to it) (result 10: balanced for learned agents except Shield, which stays too weak; not balanced for the bots)
+- [x] A balanced version of the extended card set (apply the tools to it) (results 10 and 12: balanced for learned agents in endless-draw play, with Shield fixed by a rule change; not for the bots or for deck mode)
+- [ ] Balance deck mode itself (agent-in-the-loop rounds with decks; the Heal + Venom deck and Insight under fatigue)
 - [x] Train agents in deck mode, where opponent-card memory should matter more (result 9: it made no difference)
 - [ ] Check bot-based verdicts against human players (result 11: `play` + `humancheck` are built; needs a few thousand human games, none logged yet)
 - [x] MCTS baseline (non-trivial because of hidden hands) (result 8)

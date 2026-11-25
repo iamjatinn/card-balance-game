@@ -1,7 +1,6 @@
 """Independent check of the three versions of the extended card set on NEW deals (seed 424242), with learned agents
 and with hand-written bots. Run from the project root."""
 import json
-import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 

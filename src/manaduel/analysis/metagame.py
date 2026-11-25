@@ -30,9 +30,8 @@ import numpy as np
 
 from manaduel.agents.registry import ALL_BOT_FACTORIES as BOT_FACTORIES
 from manaduel.analysis.card_effects import Games
-from manaduel.engine.decks import archetype_decks, random_deck
+from manaduel.engine.decks import random_deck
 from manaduel.engine.game import play_game
-from manaduel.sim.stats import wilson_interval
 from manaduel.sim.tournament import play_match
 
 
