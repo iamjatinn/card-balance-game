@@ -42,6 +42,9 @@ class Rules:
     # Percent of a player's shield that is still there at the start of their next turn. 0 (the original rule):
     # it all expires. 100: it stays until enemy damage uses it up (still limited by max_shield).
     shield_keep_percent: int = 0
+    # Deck building (deck mode): the most copies of one card a deck may hold. 0 = no rule (the tools then
+    # assume 6, as before). A lower limit stops one-note decks such as six copies of a poison card.
+    deck_max_copies: int = 0
 
 
 def load_config(path: Path = CONFIG_PATH) -> tuple[dict[str, Card], Rules]:

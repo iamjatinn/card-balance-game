@@ -1,0 +1,87 @@
+﻿Metagame with bot 'greedy': 8 decks, 2000 games per pairing, seed 0
+
+  aggro      strikex4 fireballx4 drainx4 venomx4 flurryx4
+  control    strikex1 fireballx1 healx4 shieldx4 drainx4 insightx4 venomx1 flurryx1
+  burst      strikex4 fireballx4 drainx4 venomx4 flurryx4
+  balanced   strikex3 fireballx3 healx3 shieldx3 drainx2 insightx2 venomx2 flurryx2
+  random1    strikex1 fireballx2 healx3 shieldx1 drainx4 insightx3 venomx4 flurryx2
+  random2    strikex2 fireballx4 shieldx1 drainx2 insightx3 venomx4 flurryx4
+  random3    strikex4 fireballx2 healx1 shieldx4 drainx2 insightx4 flurryx3
+  random4    strikex1 fireballx4 healx1 shieldx3 drainx4 insightx3 venomx2 flurryx2
+
+Deck matrix: 2000 games per pairing (row deck beats column deck; draw = half)
+               aggro   control     burst  balanced   random1   random2   random3   random4   average
+     aggro         -     49.8%     50.0%     46.3%     62.6%     67.3%     48.2%     65.5%     55.7%
+   control     50.2%         -     50.2%      0.0%      0.0%     25.1%     77.6%      0.1%     29.0%
+     burst     50.0%     49.8%         -     46.3%     62.6%     67.3%     48.2%     65.5%     55.7%
+  balanced     53.7%    100.0%     53.7%         -     45.0%     59.5%     69.5%     55.2%     62.4%
+   random1     37.4%    100.0%     37.4%     55.0%         -     46.0%     63.8%     58.4%     56.9%
+   random2     32.7%     74.9%     32.7%     40.5%     54.0%         -     40.3%     55.2%     47.2%
+   random3     51.8%     22.4%     51.8%     30.5%     36.2%     59.7%         -     55.9%     44.0%
+   random4     34.6%    100.0%     34.6%     44.8%     41.6%     44.8%     44.1%         -     49.2%
+
+Metagame health
+  dominant decks (beat the average other deck by 55% or more): ['aggro', 'burst', 'balanced', 'random1']
+  clear rock-paper-scissors cycles: 6 e.g. aggro > random1 > balanced > aggro
+  best counter to each deck (how far above 50%) and equilibrium weight:
+    balanced       counter wins 55.0%   equilibrium weight  61.0%   strikex3 fireballx3 healx3 shieldx3 drainx2 insightx2 venomx2 flurryx2
+    random1        counter wins 62.6%   equilibrium weight  15.1%   strikex1 fireballx2 healx3 shieldx1 drainx4 insightx3 venomx4 flurryx2
+    burst          counter wins 53.7%   equilibrium weight  11.9%   strikex4 fireballx4 drainx4 venomx4 flurryx4
+    aggro          counter wins 53.7%   equilibrium weight  11.9%   strikex4 fireballx4 drainx4 venomx4 flurryx4
+    random3        counter wins 77.6%   equilibrium weight   0.0%   strikex4 fireballx2 healx1 shieldx4 drainx2 insightx4 flurryx3
+    random4        counter wins 65.5%   equilibrium weight   0.0%   strikex1 fireballx4 healx1 shieldx3 drainx4 insightx3 venomx2 flurryx2
+    random2        counter wins 67.3%   equilibrium weight   0.0%   strikex2 fireballx4 shieldx1 drainx2 insightx3 venomx4 flurryx4
+    control        counter wins 100.0%   equilibrium weight   0.0%   strikex1 fireballx1 healx4 shieldx4 drainx4 insightx4 venomx1 flurryx1
+  equilibrium uses 4 of 8 decks; exploitability of the uniform mix 10.8%, of the equilibrium mix 0.14%
+
+Card power, two natural experiments (20000 games each, bot 'greedy'):
+  card         one more copy in the DECK     one more copy in the OPENING HAND
+  fireball       +3.8% [ +3.4%, +4.3%]*         +0.2% [ -0.4%, +0.7%] 
+  drain          +1.5% [ +1.1%, +2.0%]          +0.9% [ -0.1%, +2.0%] 
+  venom          +1.5% [ +1.0%, +2.0%]          +1.4% [ +0.4%, +2.5%] 
+  heal           +0.1% [ -0.2%, +0.3%]          -2.9% [ -3.8%, -2.0%]*
+  strike         -0.1% [ -0.3%, +0.2%]          -1.0% [ -1.9%, -0.1%] 
+  shield         -2.1% [ -2.5%, -1.6%]*         -0.2% [ -0.7%, +0.4%] 
+  flurry         -2.2% [ -2.7%, -1.8%]*         -5.6% [ -6.6%, -4.5%]*
+  insight        -4.3% [ -4.8%, -3.9%]*         +7.0% [ +5.9%, +8.1%]*
+  (* = flagged)  correlation between the two: -0.20
+
+Deck builder: hill climbing from 'balanced' against all 8 decks (300 games per matchup)
+  start: 62.2% against the field
+  round 1: -flurry +heal: 69.3% against the field
+  round 2: -flurry +drain: 75.0% against the field
+  round 3: -venom +drain: 76.0% against the field
+  round 4: -venom +shield: 79.1% against the field
+  round 5: no swap improves by 1%; done
+  built deck: strikex3 fireballx3 healx4 shieldx4 drainx4 insightx2
+  check on NEW games (seed 777, 2000 per matchup): balanced 60.5% -> built 79.0% average win rate against the field
+
+With the built deck added to the metagame:
+Deck matrix: 2000 games per pairing (row deck beats column deck; draw = half)
+               aggro   control     burst  balanced   random1   random2   random3   random4     built   average
+     aggro         -     53.3%     50.0%     45.6%     63.1%     68.5%     50.2%     67.0%     32.6%     53.8%
+   control     46.7%         -     46.7%      0.1%      0.2%     23.9%     77.0%      0.1%      0.0%     24.3%
+     burst     50.0%     53.3%         -     45.6%     63.1%     68.5%     50.2%     67.0%     32.6%     53.8%
+  balanced     54.4%    100.0%     54.4%         -     44.0%     59.3%     67.8%     54.1%     16.6%     56.3%
+   random1     36.9%     99.8%     36.9%     56.0%         -     44.2%     63.1%     59.2%     27.9%     53.0%
+   random2     31.6%     76.0%     31.6%     40.7%     55.8%         -     39.6%     54.7%     40.6%     46.3%
+   random3     49.8%     23.0%     49.8%     32.2%     36.9%     60.3%         -     55.1%      5.5%     39.1%
+   random4     33.1%     99.9%     33.1%     45.9%     40.8%     45.3%     44.9%         -     12.6%     44.4%
+     built     67.5%    100.0%     67.5%     83.5%     72.2%     59.4%     94.5%     87.5%         -     79.0%
+
+Metagame health
+  dominant decks (beat the average other deck by 55% or more): ['balanced', 'built']
+  clear rock-paper-scissors cycles: 6 e.g. aggro > random1 > balanced > aggro
+  best counter to each deck (how far above 50%) and equilibrium weight:
+    built          counter wins 50.0%   equilibrium weight  99.9%   strikex3 fireballx3 healx4 shieldx4 drainx4 insightx2
+    aggro          counter wins 67.5%   equilibrium weight   0.0%   strikex4 fireballx4 drainx4 venomx4 flurryx4
+    burst          counter wins 67.5%   equilibrium weight   0.0%   strikex4 fireballx4 drainx4 venomx4 flurryx4
+    random2        counter wins 68.5%   equilibrium weight   0.0%   strikex2 fireballx4 shieldx1 drainx2 insightx3 venomx4 flurryx4
+    random1        counter wins 72.2%   equilibrium weight   0.0%   strikex1 fireballx2 healx3 shieldx1 drainx4 insightx3 venomx4 flurryx2
+    balanced       counter wins 83.5%   equilibrium weight   0.0%   strikex3 fireballx3 healx3 shieldx3 drainx2 insightx2 venomx2 flurryx2
+    random4        counter wins 87.5%   equilibrium weight   0.0%   strikex1 fireballx4 healx1 shieldx3 drainx4 insightx3 venomx2 flurryx2
+    random3        counter wins 94.5%   equilibrium weight   0.0%   strikex4 fireballx2 healx1 shieldx4 drainx2 insightx4 flurryx3
+    control        counter wins 100.0%   equilibrium weight   0.0%   strikex1 fireballx1 healx4 shieldx4 drainx4 insightx4 venomx1 flurryx1
+  equilibrium uses 1 of 9 decks; exploitability of the uniform mix 25.8%, of the equilibrium mix 0.01%
+
+Saved C:\Users\jatin\OneDrive\Desktop\card-balance-ai\docs\results\metagame_decks_final_cap4.csv and C:\Users\jatin\OneDrive\Desktop\card-balance-ai\docs\results\metagame_decks_final_cap4.png

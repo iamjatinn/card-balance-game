@@ -96,7 +96,7 @@ def _metagame(args, config, factories) -> None:
     if args.effects_n:
         from manaduel.analysis.card_effects import collect, estimate_effects
 
-        factory = _pick(factories, args.bot)
+        factory = mg.make_factory(args.bot) if args.bot.startswith("ppo:") else _pick(factories, args.bot)
         print(f"\nCard power, two natural experiments ({args.effects_n} games each, bot '{args.bot}'):")
         by_deck = estimate_effects(mg.collect_decks(config, factory, args.effects_n, args.seed))
         by_hand = estimate_effects(collect(config, factory, args.effects_n, args.seed))
@@ -471,7 +471,7 @@ def main(argv=None) -> None:
     va.add_argument("--csv", help="also write the trials to this CSV file")
 
     mgp = sub.add_parser("metagame", help="deck-vs-deck analysis in deck mode (use --config configs/cards_decks.yaml)")
-    mgp.add_argument("--bot", default="greedy")
+    mgp.add_argument("--bot", default="greedy", help='a bot name, or "ppo:path/to/model.zip" for a trained agent')
     mgp.add_argument("--n", type=int, default=2000, help="games per deck pairing")
     mgp.add_argument("--seed", type=int, default=0)
     mgp.add_argument("--random-decks", type=int, default=4, help="extra random decks in the field")

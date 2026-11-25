@@ -12,6 +12,12 @@ from manaduel.engine.rules import GameConfig, allocate, check_deck
 DEFAULT_MAX_COPIES = 6
 
 
+def copy_limit(config: GameConfig, max_copies: int | None = None) -> int:
+    """The most copies of one card a deck may hold: the argument if given, else the game's rule
+    (`deck_max_copies`), else the default of 6."""
+    return max_copies or config.rules.deck_max_copies or DEFAULT_MAX_COPIES
+
+
 def _aggro_score(card) -> float:
     """How much a card pushes damage per mana."""
     return (card.damage + card.combo + card.poison * (card.poison + 1) / 2) / card.cost
@@ -22,11 +28,12 @@ def _control_score(card) -> float:
     return (card.heal + card.shield + 2 * card.draw) / card.cost
 
 
-def archetype_decks(config: GameConfig, max_copies: int = DEFAULT_MAX_COPIES) -> dict[str, tuple[int, ...]]:
+def archetype_decks(config: GameConfig, max_copies: int | None = None) -> dict[str, tuple[int, ...]]:
     """Four recognisable decks:  aggro (damage), control (heal/shield/draw), burst (the most
     expensive hitters), and balanced (each card type about equally)."""
     size = config.rules.deck_size
     cards = config.cards
+    max_copies = copy_limit(config, max_copies)
     floor = 0.05   # every card keeps a little weight so decks are not one-note
     aggro = [_aggro_score(c) + floor for c in cards]
     control = [_control_score(c) + floor for c in cards]
@@ -43,9 +50,10 @@ def archetype_decks(config: GameConfig, max_copies: int = DEFAULT_MAX_COPIES) ->
     return decks
 
 
-def random_deck(config: GameConfig, rng: random.Random, max_copies: int = DEFAULT_MAX_COPIES) -> tuple[int, ...]:
+def random_deck(config: GameConfig, rng: random.Random, max_copies: int | None = None) -> tuple[int, ...]:
     """A uniformly random deck: each card slot is a random card type, with at most `max_copies` of any."""
     size, n = config.rules.deck_size, len(config.cards)
+    max_copies = copy_limit(config, max_copies)
     if max_copies * n < size:
         raise ValueError("max_copies is too small for this deck size")
     counts = [0] * n
