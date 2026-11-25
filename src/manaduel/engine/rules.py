@@ -69,6 +69,9 @@ def check_config(config: GameConfig) -> None:
         raise ValueError("shield_keep_percent must be between 0 and 100")
     if rules.deck_size < 0 or rules.fatigue_damage < 1:
         raise ValueError("deck_size cannot be negative and fatigue_damage must be at least 1")
+    if rules.deck_max_copies < 0 or (rules.deck_max_copies and rules.deck_size
+                                     and rules.deck_max_copies * len(config.cards) < rules.deck_size):
+        raise ValueError("deck_max_copies must not be negative, and must leave room for a full deck")
     if rules.deck_size and rules.deck_size < rules.start_hand + max(0, rules.second_player_extra_cards):
         raise ValueError("the deck is too small to deal the starting hands")
 
@@ -99,7 +102,7 @@ def allocate(weights, size: int, max_copies: int | None = None) -> tuple[int, ..
 
 def default_deck(config: GameConfig) -> tuple[int, ...]:
     """The deck both players get when none is chosen: card types in proportion to their draw weights."""
-    return allocate([c.weight for c in config.cards], config.rules.deck_size)
+    return allocate([c.weight for c in config.cards], config.rules.deck_size, config.rules.deck_max_copies or None)
 
 
 def check_deck(config: GameConfig, deck) -> tuple[int, ...]:
@@ -108,6 +111,8 @@ def check_deck(config: GameConfig, deck) -> tuple[int, ...]:
             f"a deck needs {len(config.cards)} counts that are not negative and add up to "
             f"{config.rules.deck_size}, got {tuple(deck)}"
         )
+    if config.rules.deck_max_copies and max(deck) > config.rules.deck_max_copies:
+        raise ValueError(f"a deck may hold at most {config.rules.deck_max_copies} copies of a card, got {tuple(deck)}")
     return tuple(int(n) for n in deck)
 
 

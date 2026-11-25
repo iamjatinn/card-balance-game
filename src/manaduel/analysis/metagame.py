@@ -31,7 +31,7 @@ import numpy as np
 
 from manaduel.agents.registry import ALL_BOT_FACTORIES as BOT_FACTORIES
 from manaduel.analysis.card_effects import Games
-from manaduel.engine.decks import random_deck
+from manaduel.engine.decks import copy_limit, random_deck
 from manaduel.engine.game import play_game
 from manaduel.sim.tournament import play_match
 
@@ -160,7 +160,7 @@ def dominant_decks(matrix: DeckMatrix, threshold: float = 0.55) -> list[str]:
 # 3. Card power in deck context
 # --------------------------------------------------------------------------
 
-def collect_decks(config, factory, n_games: int, seed: int = 0, max_copies: int = 6) -> Games:
+def collect_decks(config, factory, n_games: int, seed: int = 0, max_copies: int | None = None) -> Games:
     """Mirror games between two RANDOM decks; the unit of analysis is the difference in copies of
     each card between the seat-0 deck and the seat-1 deck. Feed the result to
     `card_effects.estimate_effects`."""
@@ -219,13 +219,14 @@ class BuildStep:
 
 
 def build_deck(config, start: tuple, field_decks: list, bot: str = "greedy", n_games: int = 300,
-               seed: int = 0, max_copies: int = 6, max_rounds: int = 8, min_gain: float = 0.01,
+               seed: int = 0, max_copies: int | None = None, max_rounds: int = 8, min_gain: float = 0.01,
                workers: int | None = None, log=None) -> list[BuildStep]:
     """Hill climbing: swap one card for another while the average win rate against the field improves."""
     say = log or (lambda text: None)
     if workers is None:
         workers = max(1, min(8, (os.cpu_count() or 2) - 2))
     names = [c.name for c in config.cards]
+    max_copies = copy_limit(config, max_copies)
     deck = tuple(start)
     score = field_scores(config, bot, [deck], field_decks, n_games, seed, 1)[0]
     steps = [BuildStep(0, "(start)", deck, score)]

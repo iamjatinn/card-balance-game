@@ -139,3 +139,62 @@ def test_the_deck_builder_adds_the_overpowered_card():
     assert len(steps) == 2 and "+fireball" in steps[1].swap
     assert steps[1].score > steps[0].score
     assert sum(steps[1].deck) == 20 and max(steps[1].deck) <= 6
+
+
+# ---- trained agents as the players (deck mode) ------------------------------------------------
+
+class _FirstLegalModel:
+    """Stands in for a trained model: always picks the first legal action. Needs no training or torch."""
+
+    def __init__(self, config):
+        from types import SimpleNamespace
+
+        from manaduel.rl.obs import observation_size
+
+        self.observation_space = SimpleNamespace(shape=(observation_size(config, memory=False),))
+
+    def predict(self, obs, action_masks=None, deterministic=True):
+        return int(next(i for i, ok in enumerate(action_masks) if ok)), None
+
+
+def test_make_factory_builds_bots_by_name_and_agents_from_a_model_path(monkeypatch):
+    pytest.importorskip("torch")
+    import manaduel.agents.rl_agent as rl
+    from manaduel.analysis.metagame import make_factory
+    from manaduel.engine.rules import legal_actions, new_game
+
+    assert make_factory("greedy")(1).name == "greedy"
+    cfg = load_game_config(Path("configs/cards_decks.yaml"))
+    monkeypatch.setattr(rl, "load_ppo_model", lambda path: _FirstLegalModel(cfg))
+    agent = make_factory("ppo:some/model.zip")(0)
+    assert agent.name == "ppo"
+    state = new_game(cfg, 1)
+    assert agent.act(state, legal_actions(state, cfg), cfg) in legal_actions(state, cfg)
+
+
+def test_the_deck_pool_has_the_archetypes_plus_seeded_random_decks():
+    from manaduel.engine.rules import check_deck
+    from manaduel.rl.train import deck_pool
+
+    cfg = load_game_config(Path("configs/cards_decks.yaml"))
+    pool = deck_pool(cfg, 5, seed=3)
+    assert len(pool) == 4 + 5 and pool == deck_pool(cfg, 5, seed=3)          # repeatable for one seed
+    assert pool[4:] != deck_pool(cfg, 5, seed=4)[4:]                         # a different pool for another seed
+    assert all(check_deck(cfg, d) == d for d in pool)
+    assert len(deck_pool(cfg, 0)) == 4
+    assert deck_pool(load_game_config(), 5) is None                          # a game without decks has no pool
+
+
+def test_the_round_driver_measures_card_power_and_the_metagame_with_a_model(monkeypatch, tmp_path):
+    pytest.importorskip("torch")
+    import manaduel.agents.rl_agent as rl
+    from manaduel.analysis import agent_rounds
+
+    cfg_path = Path("configs/cards_decks.yaml")
+    cfg = load_game_config(cfg_path)
+    monkeypatch.setattr(rl, "load_ppo_model", lambda path: _FirstLegalModel(cfg))
+    effects, first = agent_rounds._effects_job(("m.zip", str(cfg_path), 300, 5))      # deck mode: random decks
+    assert len(effects) == len(cfg.cards) and 0.0 <= first <= 1.0
+    meta = agent_rounds.metagame_check(cfg, "m.zip", 4, 5, 1, tmp_path / "meta.txt")
+    assert meta["n_decks"] == 8 and 0.0 <= meta["best_average"] <= 1.0 and meta["best_deck"]
+    assert "Metagame health" in (tmp_path / "meta.txt").read_text(encoding="utf-8")

@@ -219,3 +219,57 @@ def test_the_keep_percent_must_be_a_percentage():
         check_config(_with_keep(101))
     with pytest.raises(ValueError):
         check_config(_with_keep(-1))
+
+
+# ---- the deck copy limit ----------------------------------------------------------------------
+
+def _decks_with_limit(limit):
+    from dataclasses import replace
+    from pathlib import Path
+
+    from manaduel.engine.rules import GameConfig, load_game_config
+
+    base = load_game_config(Path("configs/cards_decks.yaml"))
+    return GameConfig(cards=base.cards, rules=replace(base.rules, deck_max_copies=limit))
+
+
+def test_no_copy_limit_keeps_the_old_behaviour_of_six():
+    import random
+
+    from manaduel.engine.decks import archetype_decks, copy_limit, random_deck
+
+    cfg = _decks_with_limit(0)
+    assert copy_limit(cfg) == 6 and copy_limit(cfg, 4) == 4
+    assert max(max(d) for d in archetype_decks(cfg).values()) <= 6
+    assert max(random_deck(cfg, random.Random(1))) <= 6
+
+
+def test_a_copy_limit_shapes_every_deck_and_is_enforced():
+    import random
+
+    import pytest
+
+    from manaduel.engine.decks import archetype_decks, random_deck
+    from manaduel.engine.rules import check_config, check_deck, default_deck, new_game
+
+    cfg = _decks_with_limit(3)
+    check_config(cfg)
+    assert all(max(d) <= 3 for d in archetype_decks(cfg).values())
+    assert all(max(random_deck(cfg, random.Random(s))) <= 3 for s in range(20))
+    assert max(default_deck(cfg)) <= 3
+    too_many = (4, 4, 4, 4, 4, 0, 0, 0)
+    with pytest.raises(ValueError, match="at most 3 copies"):
+        check_deck(cfg, too_many)
+    with pytest.raises(ValueError):
+        new_game(cfg, 1, (too_many, too_many))
+
+
+def test_a_copy_limit_that_cannot_fill_a_deck_is_rejected():
+    import pytest
+
+    from manaduel.engine.rules import check_config
+
+    with pytest.raises(ValueError):
+        check_config(_decks_with_limit(2))       # 8 card types x 2 copies = 16 < 20
+    with pytest.raises(ValueError):
+        check_config(_decks_with_limit(-1))

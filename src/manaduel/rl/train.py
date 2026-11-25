@@ -47,6 +47,17 @@ def make_env(config, memory=False, decks=None):
     return _init
 
 
+def deck_pool(config, random_decks: int = 0, seed: int = 0):
+    """Deck mode: the decks a training game draws from (None for a game without decks): the four archetype
+    decks plus `random_decks` random ones. The random ones differ between seeds and repeat for one seed."""
+    if not config.uses_decks:
+        return None
+    decks = list(archetype_decks(config).values())
+    rng = random.Random(1000 + seed)
+    decks += [random_deck(config, rng) for _ in range(random_decks)]
+    return decks
+
+
 def build_model(vec_env, seed: int = 0) -> MaskablePPO:
     """The PPO settings used everywhere in this project (training runs and the training story)."""
     return MaskablePPO(
@@ -106,10 +117,7 @@ def main() -> None:
     args = parser.parse_args()
 
     config = load_game_config(Path(args.config)) if args.config else load_game_config()
-    decks = list(archetype_decks(config).values()) if config.uses_decks else None
-    if decks is not None and args.random_decks:
-        rng = random.Random(1000 + args.seed)       # a different pool per seed, the same pool every time for one seed
-        decks += [random_deck(config, rng) for _ in range(args.random_decks)]
+    decks = deck_pool(config, args.random_decks, args.seed)
     vec_env = DummyVecEnv([make_env(config, args.memory, decks) for _ in range(args.envs)])
     model = build_model(vec_env, args.seed)
 
