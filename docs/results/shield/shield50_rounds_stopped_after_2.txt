@@ -1,0 +1,4 @@
+round 0: worst shield -9.6%, rms 3.8%, cards off by 3+ points: ['shield'], first player 46.5%
+   shield (-9.6%): shield 6 -> 8
+round 1: worst shield -9.4%, rms 3.6%, cards off by 3+ points: ['shield'], first player 48.0%
+   shield (-9.4%): shield 8 -> 11

@@ -28,7 +28,6 @@ player who chose it, there is no ground truth about how good a card "really" is,
 and the file is one set and one event type.
 """
 
-import math
 from dataclasses import dataclass
 from statistics import NormalDist
 
