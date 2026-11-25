@@ -1,0 +1,12 @@
+round 0: worst insight -5.9%, rms 2.6%, cards off by 1.5+ points: ['fireball', 'shield', 'insight'], first player 48.4%; metagame (agent 0): best deck aggro 70.4% against the others, equilibrium uses 1 of 8 decks, 0 cycles
+   fireball (+3.2%): damage 11 -> 7
+   shield (-2.3%): shield 7 -> 9
+   insight (-5.9%): cost 3 -> 2
+round 1: worst insight -6.0%, rms 2.9%, cards off by 1.5+ points: ['fireball', 'drain', 'insight', 'venom'], first player 48.8%; metagame (agent 0): best deck random4 73.8% against the others, equilibrium uses 2 of 8 decks, 0 cycles
+   fireball (-2.4%): damage 7 -> 9
+   drain (+2.3%): damage 6 -> 5, heal 5 -> 4
+   insight (-6.0%): cost 2 -> 1
+   venom (+4.2%): poison 3 -> 2
+round 2: worst insight -5.3%, rms 2.4%, cards off by 1.5+ points: ['heal', 'insight', 'venom'], first player 45.4%; metagame (agent 0): best deck random4 73.7% against the others, equilibrium uses 1 of 8 decks, 1 cycles
+   heal (+1.9%): heal 10 -> 8
+   venom (-3.6%): poison 2 -> 3

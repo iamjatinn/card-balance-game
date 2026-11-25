@@ -61,7 +61,7 @@ Two players start at 20 HP and alternate turns.
 
 **Extended set** ([`configs/cards_extended.yaml`](configs/cards_extended.yaml)) adds three cards that use new mechanics: **Insight** (cost 2, draw 2 cards), **Venom** (cost 2, add 3 poison: at the start of the victim's turn they lose HP equal to their poison, ignoring shield, and it drops by 1), **Flurry** (cost 1, 2 damage, +3 if another card was already played this turn).
 
-**Deck mode** ([`configs/cards_decks.yaml`](configs/cards_decks.yaml)): each player brings a finite 20-card deck, drawn without replacement; drawing from an empty deck costs 1, then 2, then 3... HP (fatigue).
+**Deck mode** ([`configs/cards_decks.yaml`](configs/cards_decks.yaml)): each player brings a finite 20-card deck, drawn without replacement; drawing from an empty deck costs 1, then 2, then 3... HP (fatigue). An optional rule, `deck_max_copies`, limits the copies of one card in a deck (default: no rule).
 
 All stats and rules live in YAML files, so a balance change is a one-line edit. The new mechanics are off by default: **200 recorded v0.1 games are replayed in a test and must stay identical** (they do).
 
@@ -284,7 +284,38 @@ What a Shield can absorb is limited by the damage the opponent deals in that one
 
 The card fixes made the metagame healthier, but the deck builder still finds an exploit: hill climbing from the balanced deck ends at **6 Heal + 6 Venom** (poison that ignores shields, plus healing) and wins 83.2% against the field on new games, after which the equilibrium puts 99.9% on it. This was only tested against the greedy bot. Also, in deck mode the two card-power measures disagree (correlation −0.27): Insight is +7.0 per opening-hand copy but −5.6 per deck copy, which may be because drawing cards uses up a 20-card deck faster and fatigue starts earlier (a guess, not tested). So the final set is balanced for endless-draw play, **not for deck play**, which would need its own agent-in-the-loop rounds in deck mode.
 
-### 13. Other findings
+### 13. Deck mode: three attempts to balance it, none fully works
+
+Result 12 left deck mode unbalanced. Three attempts, all on the final card set ([`cards_decks_final.yaml`](configs/cards_decks_final.yaml)):
+
+**(a) Agent-in-the-loop rounds in deck mode.** [`agent_rounds.py`](src/manaduel/analysis/agent_rounds.py) now handles decks: agents are trained on the four archetype decks plus 12 random ones, card power is the effect of one more copy *in the deck* (agent mirror games with random decks), and every round one agent plays an eight-deck round robin ([files](docs/results/deck_balance/rounds_stopped_after_round2.txt)). I stopped it after three of six planned rounds because nothing was improving:
+
+| Round | Spread of per-copy card power (RMS, points) | Worst card | Best deck's average win rate against the other seven | Decks in the equilibrium |
+|---|---|---|---|---|
+| 0 (the set from result 12) | 2.6 | Insight −5.9 | 70.4% (aggro) | 1 of 8 |
+| 1 | 2.9 | Insight −6.0 | 73.8% (random4) | 2 of 8 |
+| 2 | 2.4 | Insight −5.3 | 73.7% (random4) | 1 of 8 |
+
+- **Insight stays 5 to 6 points weaker per deck copy** than the median card even after its cost went from 3 to 2 to 1, so its problem is not its price. A plausible cause, not tested: drawing from a 20-card deck brings fatigue closer.
+- **The per-card rule oscillates at this resolution:** Fireball went from +3.2 to −2.4 after a 36% cut, and Venom's poison counter was cut from 3 to 2 and then the next correction proposed 3 again.
+- **The metagame did not move:** the aggro deck beats six of the other seven decks (by up to 87%), and the best deck wins 70 to 74% against the others in every round. So balancing cards one at a time does not balance decks: the problem is combinations of cards, which a per-card average cannot see.
+- A difference between players: against the greedy bot the control deck (heals, shields) loses nearly every game (result 12), but for the trained agent it is a playable deck (39% average against the others).
+
+**(b) A limit on copies per card.** A new rule, `deck_max_copies` (default 0: no rule, the tools assume 6), with [`cards_decks_final_cap4.yaml`](configs/cards_decks_final_cap4.yaml) and [`cards_decks_final_cap3.yaml`](configs/cards_decks_final_cap3.yaml). Same method as result 12 (greedy bot, 2,000 games per pairing; [limit 4](docs/results/metagame_decks_final_cap4.txt), [limit 3](docs/results/metagame_decks_final_cap3.txt)), plus the same round robin played by one trained agent ([file](docs/results/deck_cap_agent_check.txt)):
+
+| Copy limit | Control deck, average win rate (greedy bot) | Decks in the equilibrium (greedy bot) | Deck builder's deck against the field, on new games (greedy bot) | Best deck against the others (trained agent) |
+|---|---|---|---|---|
+| none (up to 6) | 7.6% | 3 of 8 | 83.2% (6 Heal + 6 Venom) | 70.4% |
+| 4 | 29.0% | 4 of 8 | 79.0% (a Heal, Shield, Drain deck) | 66.4% |
+| 3 | 41.4% | 2 of 8 | 73.0% | 63.9% |
+
+A limit helps somewhat: the control deck becomes playable, the Heal + Venom deck disappears, and the best deck's edge shrinks. But decks become more alike: with a limit of 4 or 3 the aggro and burst archetypes turn into the *same* deck, so there are fewer real choices. The deck builder still finds a deck that beats every deck in the field; any search against a fixed field will, so that alone does not show the game is broken.
+
+**(c) What is still missing.** A better health measure would repeatedly add the best response to the current equilibrium and count how many decks survive (a "double oracle" loop), with trained agents as the players. That is expensive and was not done.
+
+**Result:** deck mode is **not** balanced. The endless-draw game is balanced for the trained agents (result 12); for deck play, a copy limit of 3 or 4 reduces the problem but trades away variety.
+
+### 14. Other findings
 
 - **Pure aggression is a bad strategy.** The aggressive bot plays only damage cards, so heals and shields clog its hand until the hand limit burns new damage cards. Its Elo is below random.
 - **Deterministic bots give fake precision.** In the first, deterministic version, 1,000 games between heuristic bots were really two distinct games repeated. Random draws, seat-swapped game pairs and shared deal seeds fixed this.
@@ -330,6 +361,7 @@ python -m manaduel.cli --config configs/cards_decks.yaml multiseed "checkpoints/
 # balancing with learned agents in the loop (result 10), and your own games against the bots (result 11)
 python -m manaduel.analysis.agent_rounds --start configs/cards_extended_balanced.yaml --rounds 4 --out runs/agent_balance
 python scripts/shield_diagnosis.py configs/cards.yaml checkpoints/ppo_seed0.zip 300   # how much shield is wasted (result 12)
+python -m manaduel.analysis.agent_rounds --start configs/cards_decks_final.yaml --rounds 3 --min-effect 0.015 --gain 0.10 --metagame-n 500 --out runs/deck_balance   # deck mode (result 13)
 python -m manaduel.cli play --bot greedy
 python -m manaduel.cli humancheck --bot greedy
 
@@ -360,7 +392,7 @@ configs/                  card sets: cards.yaml (original), cards_extended.yaml 
                           cards_decks.yaml (deck mode), cards_fine.yaml / cards_fine_balanced.yaml (2x resolution,
                           tuned), cards_extended_fine / _balanced / _agent_balanced / _final.yaml (the extended
                           set through the tuning stages; _final is the balanced one), cards_decks_final.yaml
-                          (deck mode with the final cards)
+                          (deck mode with the final cards; _cap4 / _cap3 add a copy limit)
 src/manaduel/
   engine/                 state, rules (legal actions, step), game loop, decks
   agents/                 Agent interface, bots, PPO wrapper, MCTS (hidden-hand tree search)
@@ -372,7 +404,7 @@ src/manaduel/
   story/                  records a training run match by match and draws the shareable pictures
   viewer/                 text viewer and pygame replay viewer (PNG / GIF export)
 scripts/                  the exact scripts behind the long runs (shield diagnosis, evaluations, final checks)
-tests/                    226 tests, including the 200-game v0.1 regression
+tests/                    232 tests, including the 200-game v0.1 regression
 docs/                     figures, demo GIFs, raw results
 ```
 
@@ -390,7 +422,7 @@ docs/                     figures, demo GIFs, raw results
 - Balancing is search over whole-number steps. On the original game it did not produce a balanced game (result 5). On the extended set the bot-based search overfitted the bots (result 10), so the final set was corrected with only three trained agents per round, and some levers are coarse (Venom's poison counter can only jump from 3 to 4, a third bigger), so the last round's worst card keeps moving around.
 - The MCTS bot (result 8) supports endless-draw games only, was tested with 100 games per setting, and was still improving with more search when measured.
 - Memory and self-play comparisons use three models per group; small differences are within seed noise.
-- The final extended set (result 12) is balanced for three learned agents in endless-draw play only: not for the hand-written bots, not for deck mode (the deck builder still finds a Heal + Venom deck that beats the field, and Insight behaves differently there), and the first-player edge is now slightly reversed (46%). It needed a rule change for Shield. The original extended set is not balanced; the game was built to exercise the tools, not to be a good game.
+- The final extended set (result 12) is balanced for three learned agents in endless-draw play only: not for the hand-written bots, not for deck mode (the deck builder still finds a Heal + Venom deck that beats the field, and Insight behaves differently there; result 13 tried to fix this and could not), and the first-player edge is now slightly reversed (46%). It needed a rule change for Shield. The original extended set is not balanced; the game was built to exercise the tools, not to be a good game.
 - Wilson intervals assume independent games; paired deal seeds make them slightly optimistic.
 - No license has been granted yet; all rights are reserved by default.
 
@@ -399,7 +431,7 @@ docs/                     figures, demo GIFs, raw results
 - [x] Engine, bots, tournaments, replays, PPO (5 seeds), card-power estimator, validation, viewer
 - [x] Real-data check, finer balancing search, new mechanics, decks, metagame, memory, self-play
 - [x] A balanced version of the extended card set (apply the tools to it) (results 10 and 12: balanced for learned agents in endless-draw play, with Shield fixed by a rule change; not for the bots or for deck mode)
-- [ ] Balance deck mode itself (agent-in-the-loop rounds with decks; the Heal + Venom deck and Insight under fatigue)
+- [ ] Balance deck mode itself (tried in result 13: per-card balancing with agents did not move the metagame; a copy limit of 3 or 4 helps but removes variety; a double-oracle health measure is still missing)
 - [x] Train agents in deck mode, where opponent-card memory should matter more (result 9: it made no difference)
 - [ ] Check bot-based verdicts against human players (result 11: `play` + `humancheck` are built; needs a few thousand human games, none logged yet)
 - [x] MCTS baseline (non-trivial because of hidden hands) (result 8)

@@ -1,0 +1,5 @@
+Eight-deck round robin played by one trained agent (500 games per pairing), by deck copy limit
+
+limit none: best deck aggro beats the others 70.4% on average, equilibrium uses 1 of 8 decks, 0 cycles, dominant decks ['aggro', 'burst', 'random4']
+limit    4: best deck aggro beats the others 66.4% on average, equilibrium uses 2 of 8 decks, 0 cycles, dominant decks ['aggro', 'burst']
+limit    3: best deck random1 beats the others 63.9% on average, equilibrium uses 1 of 8 decks, 0 cycles, dominant decks ['balanced', 'random1']

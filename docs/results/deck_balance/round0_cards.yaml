@@ -1,0 +1,39 @@
+rules:
+  max_hp: 40
+  max_mana: 5
+  max_turns: 40
+  max_shield: 12
+  start_hand: 3
+  max_hand: 6
+  draw_per_turn: 1
+  second_player_extra_cards: 0
+  deck_size: 20
+  fatigue_damage: 2
+  shield_keep_percent: 100
+cards:
+  strike:
+    cost: 1
+    damage: 7
+  fireball:
+    cost: 3
+    damage: 11
+  heal:
+    cost: 2
+    heal: 10
+  shield:
+    cost: 1
+    shield: 7
+  drain:
+    cost: 3
+    damage: 6
+    heal: 5
+  insight:
+    cost: 3
+    draw: 2
+  venom:
+    cost: 2
+    poison: 3
+  flurry:
+    cost: 1
+    damage: 1
+    combo: 6
