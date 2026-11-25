@@ -63,5 +63,16 @@ def random_deck(config: GameConfig, rng: random.Random, max_copies: int | None =
     return tuple(counts)
 
 
+def deck_pool(config: GameConfig, random_decks: int = 0, seed: int = 0):
+    """Deck mode: the decks a training game draws from (None for a game without decks): the four archetype
+    decks plus `random_decks` random ones. The random ones differ between seeds and repeat for one seed."""
+    if not config.uses_decks:
+        return None
+    decks = list(archetype_decks(config).values())
+    rng = random.Random(1000 + seed)
+    decks += [random_deck(config, rng) for _ in range(random_decks)]
+    return decks
+
+
 def describe(config: GameConfig, deck) -> str:
     return " ".join(f"{c.name}x{n}" for c, n in zip(config.cards, deck) if n)

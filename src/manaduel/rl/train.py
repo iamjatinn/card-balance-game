@@ -18,7 +18,6 @@ decks it has not seen as an archetype).
 
 import argparse
 import csv
-import random
 import time
 from pathlib import Path
 
@@ -29,7 +28,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 
 from manaduel.agents.registry import BOT_FACTORIES
 from manaduel.agents.rl_agent import PPOAgent
-from manaduel.engine.decks import archetype_decks, random_deck
+from manaduel.engine.decks import deck_pool
 from manaduel.engine.rules import load_game_config
 from manaduel.rl.env import ManaDuelEnv
 from manaduel.sim.tournament import play_match
@@ -45,17 +44,6 @@ def make_env(config, memory=False, decks=None):
         return ActionMasker(env, mask_fn)  # must be the outermost wrapper
 
     return _init
-
-
-def deck_pool(config, random_decks: int = 0, seed: int = 0):
-    """Deck mode: the decks a training game draws from (None for a game without decks): the four archetype
-    decks plus `random_decks` random ones. The random ones differ between seeds and repeat for one seed."""
-    if not config.uses_decks:
-        return None
-    decks = list(archetype_decks(config).values())
-    rng = random.Random(1000 + seed)
-    decks += [random_deck(config, rng) for _ in range(random_decks)]
-    return decks
 
 
 def build_model(vec_env, seed: int = 0) -> MaskablePPO:
