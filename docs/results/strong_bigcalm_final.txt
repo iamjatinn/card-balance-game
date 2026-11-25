@@ -1,0 +1,13 @@
+﻿Evaluating 2 models, 500 games per bot, seed 777
+
+Final evaluation of 2 trained model(s): 500 games per bot, same fresh games for every model
+model                       random  aggressive   defensive      greedy      mean
+strong_bigcalm_seed0.zip       94.5%       92.3%       70.5%       74.2%     82.9%
+strong_bigcalm_seed1.zip       95.3%       92.9%       71.5%       72.8%     83.1%
+mean                         94.9%       92.6%       71.0%       73.5%     83.0%
+std across models             0.6%        0.4%        0.7%        1.0%      0.2%
+worst model                  94.5%       92.3%       70.5%       72.8%     82.9%
+best model                   95.3%       92.9%       71.5%       74.2%     83.1%
+
+Saved docs\results\strong_bigcalm_final.csv
+

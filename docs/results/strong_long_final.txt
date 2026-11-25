@@ -1,0 +1,13 @@
+﻿Evaluating 2 models, 500 games per bot, seed 777
+
+Final evaluation of 2 trained model(s): 500 games per bot, same fresh games for every model
+model                       random  aggressive   defensive      greedy      mean
+strong_long_seed0.zip        94.1%       92.5%       70.8%       74.5%     83.0%
+strong_long_seed1.zip        94.5%       90.9%       71.9%       74.6%     83.0%
+mean                         94.3%       91.7%       71.4%       74.6%     83.0%
+std across models             0.3%        1.1%        0.8%        0.1%      0.0%
+worst model                  94.1%       90.9%       70.8%       74.5%     83.0%
+best model                   94.5%       92.5%       71.9%       74.6%     83.0%
+
+Saved docs\results\strong_long_final.csv
+

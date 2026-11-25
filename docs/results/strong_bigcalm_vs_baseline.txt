@@ -1,0 +1,9 @@
+﻿2 models vs 5 models, 400 games per pairing, seed 4242
+
+strong_bigcalm (rows) against baseline (600k steps) (columns): 400 games per pairing of two models
+win rate of the row model:
+  model A0    49.2%   52.0%   52.2%   54.8%   49.1%   mean 51.5%
+  model A1    55.2%   54.0%   51.5%   57.2%   53.9%   mean 54.4%
+mean over all 10 model pairs: 52.9% (std across pairs 2.6%; best A model 54.4%, worst 51.5%)
+strong_bigcalm wins the pairing in 8 of 10 model pairs
+
