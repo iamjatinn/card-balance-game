@@ -174,7 +174,7 @@ def test_make_factory_builds_bots_by_name_and_agents_from_a_model_path(monkeypat
 
 def test_the_deck_pool_has_the_archetypes_plus_seeded_random_decks():
     from manaduel.engine.rules import check_deck
-    from manaduel.rl.train import deck_pool
+    from manaduel.engine.decks import deck_pool
 
     cfg = load_game_config(Path("configs/cards_decks.yaml"))
     pool = deck_pool(cfg, 5, seed=3)
