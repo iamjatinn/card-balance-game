@@ -16,8 +16,9 @@ Four pieces:
 4. DECK BUILDER: hill climbing that swaps one card for another to beat a field of decks,
    checked afterwards on NEW games so the improvement is not just luck.
 
-Limits: results are for the bot used (here usually the greedy bot), a bot that does not
-plan around the metagame; "equilibrium" is among the decks supplied, not all possible decks.
+Limits: results are for the player used (a hand-written bot such as the greedy bot, or a trained
+agent given as "ppo:path/to/model.zip"), which does not plan around the metagame; "equilibrium" is
+among the decks supplied, not all possible decks.
 """
 
 import itertools
@@ -33,6 +34,19 @@ from manaduel.analysis.card_effects import Games
 from manaduel.engine.decks import random_deck
 from manaduel.engine.game import play_game
 from manaduel.sim.tournament import play_match
+
+
+def make_factory(spec: str):
+    """A bot name ("greedy") or a trained model ("ppo:path/to/model.zip") -> factory(seed) -> agent."""
+    if spec.startswith("ppo:"):
+        import torch
+
+        torch.set_num_threads(1)
+        from manaduel.agents.rl_agent import PPOAgent, load_ppo_model
+
+        model = load_ppo_model(spec[4:])
+        return lambda seed: PPOAgent(model)
+    return BOT_FACTORIES[spec]
 
 
 # --------------------------------------------------------------------------
@@ -52,7 +66,7 @@ class DeckMatrix:
 
 def _pair_job(job):
     config, bot, name_i, name_j, deck_i, deck_j, n_games, seed = job
-    factory = BOT_FACTORIES[bot]
+    factory = make_factory(bot)
     r = play_match(config, name_i, factory, name_j, factory, n_games, seed, decks=(deck_i, deck_j))
     return r.score_a, r.interval_a(), r.draws / r.games
 
@@ -169,7 +183,7 @@ def collect_decks(config, factory, n_games: int, seed: int = 0, max_copies: int 
 
 def _field_score(job) -> float:
     config, bot, deck, field_decks, n_games, seed = job
-    factory = BOT_FACTORIES[bot]
+    factory = make_factory(bot)
     scores = [play_match(config, "me", factory, f"f{k}", factory, n_games, seed, decks=(deck, other)).score_a
               for k, other in enumerate(field_decks)]
     return float(np.mean(scores))

@@ -12,11 +12,13 @@ rate, so you can watch it learn. The finished model is saved to --out.
            the four bots AND its own recent past selves, chosen at random each game.
 --config   which card set to play (default configs/cards.yaml)
 In deck mode (a config with deck_size) each game gives both players a random deck
-from the four archetypes.
+from the four archetypes (plus --random-decks N random ones, so the agent also learns to play
+decks it has not seen as an archetype).
 """
 
 import argparse
 import csv
+import random
 import time
 from pathlib import Path
 
@@ -27,7 +29,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 
 from manaduel.agents.registry import BOT_FACTORIES
 from manaduel.agents.rl_agent import PPOAgent
-from manaduel.engine.decks import archetype_decks
+from manaduel.engine.decks import archetype_decks, random_deck
 from manaduel.engine.rules import load_game_config
 from manaduel.rl.env import ManaDuelEnv
 from manaduel.sim.tournament import play_match
@@ -98,11 +100,16 @@ def main() -> None:
     parser.add_argument("--config", help="card/rule file (default configs/cards.yaml)")
     parser.add_argument("--memory", action="store_true", help="observe the opponent's played cards")
     parser.add_argument("--selfplay", action="store_true", help="also train against frozen copies of itself")
+    parser.add_argument("--random-decks", type=int, default=0,
+                        help="deck mode: add this many random decks to the four archetype decks")
     parser.add_argument("--keep", type=int, default=4, help="how many frozen copies to keep (with --selfplay)")
     args = parser.parse_args()
 
     config = load_game_config(Path(args.config)) if args.config else load_game_config()
     decks = list(archetype_decks(config).values()) if config.uses_decks else None
+    if decks is not None and args.random_decks:
+        rng = random.Random(1000 + args.seed)       # a different pool per seed, the same pool every time for one seed
+        decks += [random_deck(config, rng) for _ in range(args.random_decks)]
     vec_env = DummyVecEnv([make_env(config, args.memory, decks) for _ in range(args.envs)])
     model = build_model(vec_env, args.seed)
 
