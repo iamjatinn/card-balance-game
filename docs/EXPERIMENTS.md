@@ -264,11 +264,11 @@ The agents win about 83% of their games against the four bots. Is that limit set
 | bigger: 2.4M steps, network 256 x 256, 512 steps per update, batch 512 | 96.3% | 92.8% | 72.4% | 74.9% | **84.1%** | **55.5%** (ahead in 10 of 10) |
 | bigger, less exploration: 256 x 256, exploration bonus 0.003 | 94.9% | 92.6% | 71.0% | 73.5% | 83.0% | 52.9% (ahead in 8 of 10) |
 
-([longer](docs/results/strong_long_final.txt), [bigger](docs/results/strong_big_final.txt), [bigger, less exploration](docs/results/strong_bigcalm_final.txt), [head to head](docs/results/strong_big_vs_baseline.txt), [curves](docs/results/strong_big_curve_seed0.csv).)
+([longer](results/strong_long_final.txt), [bigger](results/strong_big_final.txt), [bigger, less exploration](results/strong_bigcalm_final.txt), [head to head](results/strong_big_vs_baseline.txt), [curves](results/strong_big_curve_seed0.csv).)
 
 - **Longer training alone did nothing.** The learning curves are flat after about 600,000 steps, and the longer models are no better than the baseline (50.2% head to head).
 - **A bigger network with larger batches helped a little.** It gained about 1 point against the bots and beat the old models 55.5% of the time, ahead in all 10 pairings. Three settings changed together, and only two models were trained, so I cannot say which setting mattered or that the size of the gain is exact.
-- **There is probably a ceiling set by luck.** Against defensive and greedy even the baseline models lose about 20% of their games and draw 11 to 17% ([file](docs/results/ppo_win_draw_loss.txt)); hands are random, so some games are lost whatever the play. This is a suggestion, not a proof: the tree search with four times more search also stopped near 70% against greedy (result 8).
+- **There is probably a ceiling set by luck.** Against defensive and greedy even the baseline models lose about 20% of their games and draw 11 to 17% ([file](results/ppo_win_draw_loss.txt)); hands are random, so some games are lost whatever the play. This is a suggestion, not a proof: the tree search with four times more search also stopped near 70% against greedy (result 8).
 
 ### 15. Other findings
 
