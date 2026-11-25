@@ -46,19 +46,21 @@ def make_env(config, memory=False, decks=None):
     return _init
 
 
-def build_model(vec_env, seed: int = 0) -> MaskablePPO:
-    """The PPO settings used everywhere in this project (training runs and the training story)."""
+def build_model(vec_env, seed: int = 0, net=(128, 128), n_steps: int = 256, batch_size: int = 256,
+                ent_coef: float = 0.01, learning_rate: float = 3e-4) -> MaskablePPO:
+    """The PPO settings used everywhere in this project (training runs and the training story).
+    The defaults are the original settings, so every earlier result can be reproduced."""
     return MaskablePPO(
         "MlpPolicy",
         vec_env,
-        learning_rate=3e-4,
-        n_steps=256,          # steps collected per game before each update
-        batch_size=256,
+        learning_rate=learning_rate,
+        n_steps=n_steps,      # steps collected per game before each update
+        batch_size=batch_size,
         n_epochs=10,
         gamma=0.99,           # how much future reward matters
         gae_lambda=0.95,
-        ent_coef=0.01,        # a little extra exploration
-        policy_kwargs=dict(net_arch=[128, 128]),
+        ent_coef=ent_coef,    # a little extra exploration
+        policy_kwargs=dict(net_arch=list(net)),
         seed=seed,
         device="cpu",
         verbose=0,
@@ -102,12 +104,17 @@ def main() -> None:
     parser.add_argument("--random-decks", type=int, default=0,
                         help="deck mode: add this many random decks to the four archetype decks")
     parser.add_argument("--keep", type=int, default=4, help="how many frozen copies to keep (with --selfplay)")
+    parser.add_argument("--net", type=int, nargs="+", default=[128, 128], help="hidden layer sizes of the network")
+    parser.add_argument("--n-steps", type=int, default=256, help="steps per environment between updates")
+    parser.add_argument("--batch-size", type=int, default=256)
+    parser.add_argument("--ent-coef", type=float, default=0.01, help="exploration bonus (higher = explores more)")
+    parser.add_argument("--lr", type=float, default=3e-4, help="learning rate")
     args = parser.parse_args()
 
     config = load_game_config(Path(args.config)) if args.config else load_game_config()
     decks = deck_pool(config, args.random_decks, args.seed)
     vec_env = DummyVecEnv([make_env(config, args.memory, decks) for _ in range(args.envs)])
-    model = build_model(vec_env, args.seed)
+    model = build_model(vec_env, args.seed, tuple(args.net), args.n_steps, args.batch_size, args.ent_coef, args.lr)
 
     log_path = Path(args.log)
     log_path.parent.mkdir(parents=True, exist_ok=True)

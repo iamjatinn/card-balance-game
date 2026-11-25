@@ -1,0 +1,9 @@
+﻿2 models vs 5 models, 400 games per pairing, seed 4242
+
+strong_big (rows) against baseline (600k steps) (columns): 400 games per pairing of two models
+win rate of the row model:
+  model A0    55.6%   56.6%   55.4%   58.5%   55.5%   mean 56.3%
+  model A1    54.5%   56.5%   52.2%   58.0%   51.6%   mean 54.6%
+mean over all 10 model pairs: 55.5% (std across pairs 2.2%; best A model 56.3%, worst 54.6%)
+strong_big wins the pairing in 10 of 10 model pairs
+
